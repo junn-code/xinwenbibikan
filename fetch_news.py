@@ -2,24 +2,32 @@
 import json
 import re
 import html
-import time
 import xml.etree.ElementTree as ET
 
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.request import Request, urlopen
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit, quote
 
 
 # ==========================================
 # 新闻来源
 # ==========================================
 
+def google_rss(query, language="zh-CN", country="MY"):
+    q = quote(query)
+    return (
+        "https://news.google.com/rss/search?q=" + q
+        + "&hl=" + language
+        + "&gl=" + country
+        + "&ceid=" + country + ":" + language
+    )
+
+
 SOURCES = [
 
     # MALAYSIA - ENGLISH
-
     {
         "name": "The Star",
         "urls": ["https://www.thestar.com.my/rss/News"],
@@ -47,7 +55,6 @@ SOURCES = [
     },
 
     # MALAYSIA - BAHASA MELAYU
-
     {
         "name": "Berita Harian",
         "urls": ["https://www.bharian.com.my/rss.xml"],
@@ -75,32 +82,51 @@ SOURCES = [
     },
 
     # MALAYSIA - CHINESE
-
     {
         "name": "星洲日报",
         "urls": [
-            "https://www.sinchew.com.my/feed/",
-            "https://rsshub.app/sinchew/latest"
+            google_rss("site:sinchew.com.my", "zh-CN", "MY"),
+            google_rss("site:sinchew.com.my 新闻", "zh-CN", "MY")
         ],
         "lang": "zh", "country": "my"
     },
     {
         "name": "中国报",
         "urls": [
-            "https://www.chinapress.com.my/feed/"
+            google_rss("site:chinapress.com.my", "zh-CN", "MY")
         ],
         "lang": "zh", "country": "my"
     },
     {
         "name": "南洋商报",
         "urls": [
-            "https://www.enanyang.my/feed/"
+            google_rss("site:enanyang.my", "zh-CN", "MY")
+        ],
+        "lang": "zh", "country": "my"
+    },
+    {
+        "name": "东方日报",
+        "urls": [
+            google_rss("site:orientaldaily.com.my", "zh-CN", "MY")
+        ],
+        "lang": "zh", "country": "my"
+    },
+    {
+        "name": "光华日报",
+        "urls": [
+            google_rss("site:kwongwah.com.my", "zh-CN", "MY")
+        ],
+        "lang": "zh", "country": "my"
+    },
+    {
+        "name": "光明日报",
+        "urls": [
+            google_rss("site:guangming.com.my", "zh-CN", "MY")
         ],
         "lang": "zh", "country": "my"
     },
 
     # MALAYSIA - TAMIL
-
     {
         "name": "Makkal Osai",
         "urls": ["https://makkalosai.com.my/feed/"],
@@ -108,12 +134,9 @@ SOURCES = [
     },
 
     # JAPAN
-
     {
         "name": "NHK World",
-        "urls": [
-            "https://www3.nhk.or.jp/nhkworld/en/news/feeds/"
-        ],
+        "urls": ["https://www3.nhk.or.jp/nhkworld/en/news/feeds/"],
         "lang": "en", "country": "japan"
     },
     {
@@ -123,7 +146,6 @@ SOURCES = [
     },
 
     # SOUTH KOREA
-
     {
         "name": "Yonhap News",
         "urls": ["https://en.yna.co.kr/RSS/news.xml"],
@@ -131,39 +153,74 @@ SOURCES = [
     },
     {
         "name": "Korea Herald",
-        "urls": [
-            "https://www.koreaherald.com/rss/koreaherald.xml"
-        ],
+        "urls": ["https://www.koreaherald.com/rss/koreaherald.xml"],
         "lang": "en", "country": "korea"
     },
 
-    # CHINA
-
+    # CHINA - SIMPLIFIED CHINESE
     {
-        "name": "China Daily",
+        "name": "中国新闻网",
         "urls": [
-            "https://www.chinadaily.com.cn/rss/world_rss.xml"
+            "https://www.chinanews.com.cn/rss/scroll-news.xml",
+            "https://www.chinanews.com.cn/rss/china.xml",
+            "https://www.chinanews.com.cn/rss/importnews.xml",
+            google_rss("site:chinanews.com.cn", "zh-CN", "CN")
         ],
-        "lang": "en", "country": "china"
+        "lang": "zh", "country": "china"
     },
     {
-        "name": "Xinhua",
+        "name": "人民网",
         "urls": [
-            "https://english.news.cn/rss/worldrss.xml"
+            google_rss("site:people.com.cn", "zh-CN", "CN")
         ],
-        "lang": "en", "country": "china"
+        "lang": "zh", "country": "china"
+    },
+    {
+        "name": "新华网",
+        "urls": [
+            google_rss("site:news.cn", "zh-CN", "CN")
+        ],
+        "lang": "zh", "country": "china"
     },
 
-    # TAIWAN
-
+    # TAIWAN - TRADITIONAL CHINESE
     {
-        "name": "Focus Taiwan",
-        "urls": ["https://focustaiwan.tw/rss"],
-        "lang": "en", "country": "taiwan"
+        "name": "中央社",
+        "urls": [
+            "https://feeds.feedburner.com/rsscna/politics",
+            "https://feeds.feedburner.com/rsscna/intworld",
+            "https://feeds.feedburner.com/rsscna/mainland",
+            "https://feeds.feedburner.com/rsscna/finance",
+            "https://feeds.feedburner.com/rsscna/technology",
+            "https://feeds.feedburner.com/rsscna/social",
+            google_rss("site:cna.com.tw", "zh-TW", "TW")
+        ],
+        "lang": "zh", "country": "taiwan"
+    },
+    {
+        "name": "自由时报",
+        "urls": [
+            "https://news.ltn.com.tw/rss/all.xml",
+            google_rss("site:ltn.com.tw", "zh-TW", "TW")
+        ],
+        "lang": "zh", "country": "taiwan"
+    },
+    {
+        "name": "联合新闻网",
+        "urls": [
+            google_rss("site:udn.com", "zh-TW", "TW")
+        ],
+        "lang": "zh", "country": "taiwan"
+    },
+    {
+        "name": "TVBS新闻网",
+        "urls": [
+            google_rss("site:news.tvbs.com.tw", "zh-TW", "TW")
+        ],
+        "lang": "zh", "country": "taiwan"
     },
 
     # SINGAPORE
-
     {
         "name": "Channel News Asia",
         "urls": [
@@ -173,7 +230,6 @@ SOURCES = [
     },
 
     # USA
-
     {
         "name": "NPR",
         "urls": ["https://feeds.npr.org/1001/rss.xml"],
@@ -181,12 +237,9 @@ SOURCES = [
     },
 
     # UK
-
     {
         "name": "BBC News",
-        "urls": [
-            "https://feeds.bbci.co.uk/news/world/rss.xml"
-        ],
+        "urls": ["https://feeds.bbci.co.uk/news/world/rss.xml"],
         "lang": "en", "country": "uk"
     },
     {
@@ -196,12 +249,9 @@ SOURCES = [
     },
 
     # EUROPEAN UNION
-
     {
         "name": "Euronews",
-        "urls": [
-            "https://www.euronews.com/rss?level=theme&name=news"
-        ],
+        "urls": ["https://www.euronews.com/rss?level=theme&name=news"],
         "lang": "en", "country": "eu"
     },
     {
@@ -221,19 +271,16 @@ def local_name(tag):
 
 
 def clean_text(value):
-
     if not value:
         return ""
 
     value = html.unescape(str(value))
-
     value = re.sub(
         r"<(script|style)[^>]*>.*?</\1>",
         " ",
         value,
         flags=re.I | re.S
     )
-
     value = re.sub(r"<[^>]+>", " ", value)
     value = re.sub(r"\s+", " ", value)
 
@@ -241,12 +288,10 @@ def clean_text(value):
 
 
 def normalize_date(value):
-
     if not value:
         return datetime.now(timezone.utc).isoformat()
 
     try:
-
         try:
             date = parsedate_to_datetime(value)
         except Exception:
@@ -263,32 +308,21 @@ def normalize_date(value):
         return datetime.now(timezone.utc).isoformat()
 
 
-# ==========================================
-# XML 字段读取
-# ==========================================
-
 def get_child_text(element, names):
-
     names = {name.lower() for name in names}
 
     for child in element:
-
         if local_name(child.tag) in names:
-
             value = "".join(child.itertext()).strip()
-
             if value:
                 return value
 
     for child in element.iter():
-
         if child is element:
             continue
 
         if local_name(child.tag) in names:
-
             value = "".join(child.itertext()).strip()
-
             if value:
                 return value
 
@@ -296,16 +330,13 @@ def get_child_text(element, names):
 
 
 def get_link(entry):
-
     for child in entry.iter():
-
         if child is entry:
             continue
 
         tag = local_name(child.tag)
 
         if tag == "link":
-
             href = child.attrib.get("href", "").strip()
 
             if href.startswith(("http://", "https://")):
@@ -317,7 +348,6 @@ def get_link(entry):
                 return value
 
         if tag == "guid":
-
             value = "".join(child.itertext()).strip()
 
             if value.startswith(("http://", "https://")):
@@ -327,24 +357,20 @@ def get_link(entry):
 
 
 # ==========================================
-# 解析 RSS / Atom / RDF
+# RSS 解析
 # ==========================================
 
 def parse_feed(raw_data, source):
-
     root = ET.fromstring(raw_data)
-
     entries = []
 
     for element in root.iter():
-
         if local_name(element.tag) in ("item", "entry"):
             entries.append(element)
 
     results = []
 
     for entry in entries:
-
         title = clean_text(
             get_child_text(entry, {"title"})
         )
@@ -360,28 +386,16 @@ def parse_feed(raw_data, source):
         summary = clean_text(
             get_child_text(
                 entry,
-                {
-                    "description",
-                    "summary",
-                    "encoded",
-                    "content"
-                }
+                {"description", "summary", "encoded", "content"}
             )
         )
 
         published = get_child_text(
             entry,
-            {
-                "pubdate",
-                "published",
-                "updated",
-                "date",
-                "date.issued"
-            }
+            {"pubdate", "published", "updated", "date"}
         )
 
         results.append({
-
             "h": title,
             "u": link,
             "o": source["name"],
@@ -389,36 +403,32 @@ def parse_feed(raw_data, source):
             "l": source["lang"],
             "country": source["country"],
             "summary": summary[:700]
-
         })
 
     return results
 
 
 # ==========================================
-# 抓取单一来源
+# 抓取单一来源：读取所有 RSS 地址
 # ==========================================
 
 def fetch_source(source):
-
     print("\n正在抓取：", source["name"])
 
+    all_results = []
     errors = []
 
     for feed_url in source["urls"]:
-
         try:
-
             request = Request(
                 feed_url,
                 headers={
-                    "User-Agent": "Mozilla/5.0 NewsCompare/1.0",
+                    "User-Agent": "Mozilla/5.0 NewsCompare/2.0",
                     "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, */*"
                 }
             )
 
             with urlopen(request, timeout=25) as response:
-
                 raw_data = response.read()
                 status = response.status
 
@@ -435,38 +445,27 @@ def fetch_source(source):
 
             results = parse_feed(raw_data, source)
 
-            if results:
+            if not results:
+                raise ValueError("RSS 中没有有效新闻")
 
-                print(
-                    "[成功]",
-                    source["name"],
-                    len(results),
-                    "篇",
-                    "| HTTP:",
-                    status
-                )
+            all_results.extend(results)
 
-                return results
-
-            raise ValueError(
-                "RSS XML 已读取，但没有找到有效新闻"
+            print(
+                "[成功]",
+                source["name"],
+                len(results),
+                "篇 | HTTP:",
+                status
             )
 
         except Exception as error:
+            errors.append(feed_url + " -> " + str(error))
+            print("[失败]", source["name"], str(error))
 
-            message = str(error)
+    if not all_results:
+        raise Exception("；".join(errors) or "没有取得新闻")
 
-            errors.append(
-                feed_url + " -> " + message
-            )
-
-            print(
-                "[备用地址失败]",
-                source["name"],
-                message
-            )
-
-    raise Exception("；".join(errors))
+    return all_results
 
 
 # ==========================================
@@ -474,9 +473,7 @@ def fetch_source(source):
 # ==========================================
 
 def normalize_url(url):
-
     try:
-
         parts = urlsplit(url)
 
         return urlunsplit((
@@ -488,7 +485,6 @@ def normalize_url(url):
         ))
 
     except Exception:
-
         return url
 
 
@@ -497,7 +493,6 @@ def normalize_url(url):
 # ==========================================
 
 def main():
-
     all_news = []
     success_sources = []
     failed_sources = []
@@ -510,20 +505,16 @@ def main():
     print("\n新闻来源总数：", len(SOURCES))
 
     with ThreadPoolExecutor(max_workers=8) as executor:
-
         futures = {
             executor.submit(fetch_source, source): source
             for source in SOURCES
         }
 
         for future in as_completed(futures):
-
             source = futures[future]
 
             try:
-
                 result = future.result()
-
                 all_news.extend(result)
 
                 success_sources.append({
@@ -532,25 +523,18 @@ def main():
                 })
 
             except Exception as error:
-
                 failed_sources.append({
                     "source": source["name"],
                     "error": str(error)
                 })
 
-                print(
-                    "[失败]",
-                    source["name"],
-                    error
-                )
+                print("[来源失败]", source["name"], error)
 
     # 去重
-
     seen = set()
     unique_news = []
 
     for item in all_news:
-
         url = normalize_url(item["u"])
 
         if not url or url in seen:
@@ -560,40 +544,26 @@ def main():
         unique_news.append(item)
 
     # 排序
-
     unique_news.sort(
         key=lambda item: item["t"],
         reverse=True
     )
 
     # 输出 JSON
-
     output = {
-
-        "updated_at": datetime.now(
-            timezone.utc
-        ).isoformat(),
-
+        "updated_at": datetime.now(timezone.utc).isoformat(),
         "items": unique_news,
-
         "sources_ok": sorted(
             success_sources,
             key=lambda x: x["source"]
         ),
-
         "sources_failed": sorted(
             failed_sources,
             key=lambda x: x["source"]
         )
-
     }
 
-    with open(
-        "news.json",
-        "w",
-        encoding="utf-8"
-    ) as file:
-
+    with open("news.json", "w", encoding="utf-8") as file:
         json.dump(
             output,
             file,
@@ -601,33 +571,30 @@ def main():
             indent=2
         )
 
-    # 报告
-
+    # 统计
     print("\n===================================")
     print("新闻抓取完成")
     print("-----------------------------------")
-
     print("新闻总数：", len(unique_news))
     print("成功来源：", len(success_sources))
     print("失败来源：", len(failed_sources))
 
-    print("-----------------------------------")
-
     print("\n中文新闻统计：")
 
     for item in unique_news:
-
         if item["l"] == "zh":
             print(
+                item["country"],
+                "|",
                 item["o"],
                 "|",
                 item["h"]
             )
 
-    print("\n中文新闻总数：", sum(
-        1 for item in unique_news
-        if item["l"] == "zh"
-    ))
+    print(
+        "\n中文新闻总数：",
+        sum(1 for item in unique_news if item["l"] == "zh")
+    )
 
     print("\n已生成 news.json")
     print("===================================")
