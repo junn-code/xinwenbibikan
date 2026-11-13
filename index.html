@@ -366,6 +366,33 @@ input:focus, select:focus {
   border-radius: 18px;
   padding: 17px;
   min-width: 0;
+}.country-column {
+  background: #fafafa;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 17px;
+  min-width: 0;
+
+  /* 每个国家独立滑动 */
+  max-height: 650px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #b8b8bd transparent;
+}
+
+.country-column::-webkit-scrollbar {
+  width: 7px;
+}
+
+.country-column::-webkit-scrollbar-thumb {
+  background: #b8b8bd;
+  border-radius: 20px;
+}
+
+.country-column::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .country-column .news-item {
@@ -858,7 +885,7 @@ function renderInternational() {
             <h3>${c.flag} ${c.name}</h3>
             <div class="muted">${news.length} 篇新闻</div>
             ${
-              filtered(news).slice(0,8).map(article).join("")
+              filtered(news).map(article).join("")
               || '<div class="empty">暂无新闻</div>'
             }
           </div>
