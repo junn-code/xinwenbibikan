@@ -1,0 +1,1028 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>新闻比比看！</title>
+
+<style>
+:root {
+  --black: #1d1d1f;
+  --gray: #6e6e73;
+  --light: #f5f5f7;
+  --white: #fff;
+  --blue: #06c;
+  --border: #e5e5e8;
+  --radius: 22px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--light);
+  color: var(--black);
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+/* NAVIGATION */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,.86);
+  backdrop-filter: saturate(180%) blur(22px);
+  border-bottom: 1px solid rgba(0,0,0,.07);
+  padding: 0 max(20px, calc((100% - 1180px)/2));
+}
+
+.brand-row {
+  height: 55px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -.7px;
+}
+
+.tagline {
+  font-size: 12px;
+  color: var(--gray);
+}
+
+nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 11px;
+  scrollbar-width: none;
+}
+
+nav button {
+  border: 0;
+  background: transparent;
+  border-radius: 30px;
+  padding: 9px 14px;
+  color: #424245;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 13px;
+  transition: .2s;
+}
+
+nav button:hover {
+  background: #f0f0f2;
+}
+
+nav button.active {
+  background: var(--black);
+  color: white;
+}
+
+/* GENERAL */
+
+main {
+  max-width: 1180px;
+  margin: auto;
+  padding: 28px 24px 65px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.panel {
+  background: white;
+  border: 1px solid rgba(0,0,0,.045);
+  border-radius: var(--radius);
+  padding: 30px;
+  margin: 18px 0;
+  box-shadow: 0 4px 22px rgba(0,0,0,.025);
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+h2 {
+  font-size: clamp(24px, 3vw, 32px);
+  letter-spacing: -1.2px;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+h3 {
+  font-size: 17px;
+  letter-spacing: -.4px;
+}
+
+.muted {
+  color: var(--gray);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* HERO */
+
+.hero {
+  padding: 85px 20px 75px;
+  text-align: center;
+}
+
+.eyebrow {
+  color: var(--gray);
+  font-size: 12px;
+  letter-spacing: 3px;
+  margin-bottom: 22px;
+}
+
+.hero h1 {
+  font-size: clamp(45px, 8vw, 86px);
+  line-height: 1.05;
+  letter-spacing: -5px;
+  font-weight: 750;
+  margin-bottom: 25px;
+}
+
+.hero p {
+  color: var(--gray);
+  font-size: clamp(17px, 2vw, 22px);
+  max-width: 650px;
+  margin: auto;
+}
+
+.hero-note {
+  margin-top: 25px;
+  font-size: 12px;
+  color: var(--gray);
+}
+
+/* TOOLBAR */
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+input, select {
+  border: 1px solid #d2d2d7;
+  border-radius: 30px;
+  padding: 12px 17px;
+  background: white;
+  outline: none;
+  font-size: 14px;
+}
+
+input:focus, select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0,102,204,.1);
+}
+
+#search {
+  flex: 1;
+  min-width: 220px;
+}
+
+.btn {
+  border: 1px solid #d2d2d7;
+  background: white;
+  border-radius: 30px;
+  padding: 9px 15px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: .2s;
+}
+
+.btn:hover {
+  background: #f0f0f2;
+}
+
+#status {
+  color: var(--gray);
+  font-size: 12px;
+  padding: 5px 3px 15px;
+}
+
+/* LANGUAGE */
+
+.lang-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 25px;
+}
+
+.lang-col {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 19px;
+  background: white;
+  min-width: 0;
+  transition: .25s;
+}
+
+.lang-col:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.06);
+}
+
+.lang-col h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lang-col .code {
+  font-size: 25px;
+  font-weight: 750;
+}
+
+.pill {
+  background: #f0f0f2;
+  padding: 5px 10px;
+  border-radius: 30px;
+  font-size: 11px;
+  color: #555;
+}
+
+/* NEWS */
+
+.news-item {
+  padding: 15px 0;
+  border-top: 1px solid #ededf0;
+}
+
+.news-item a {
+  color: var(--black);
+  text-decoration: none;
+  font-weight: 620;
+  line-height: 1.5;
+  display: inline-block;
+}
+
+.news-item a:hover {
+  color: var(--blue);
+}
+
+.meta {
+  color: var(--gray);
+  font-size: 12px;
+  margin-top: 7px;
+  line-height: 1.6;
+}
+
+.empty {
+  padding: 25px 10px;
+  text-align: center;
+  color: var(--gray);
+  font-size: 13px;
+}
+
+/* COUNTRIES */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 13px;
+}
+
+.country {
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 18px;
+  padding: 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: .2s;
+  min-height: 95px;
+}
+
+.country:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,.06);
+}
+
+.country.selected {
+  border: 1.5px solid var(--blue);
+  background: #f2f8ff;
+}
+
+.country strong {
+  display: block;
+  font-size: 17px;
+  margin-bottom: 6px;
+}
+
+.country span {
+  color: var(--gray);
+  font-size: 12px;
+}
+
+.country-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.country-columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.country-column {
+  background: #fafafa;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 17px;
+  min-width: 0;
+}
+
+.stat {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.stat span {
+  background: #f5f5f7;
+  padding: 6px 10px;
+  border-radius: 30px;
+  font-size: 11px;
+  color: #555;
+}
+
+/* FOOTER */
+
+footer {
+  max-width: 1180px;
+  margin: auto;
+  padding: 0 24px 35px;
+  text-align: center;
+  color: var(--gray);
+  font-size: 11px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width: 900px) {
+  .lang-grid,
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .country-columns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media(max-width: 600px) {
+  header {
+    padding: 0 14px;
+  }
+
+  .tagline {
+    display: none;
+  }
+
+  main {
+    padding: 16px 13px 40px;
+  }
+
+  .hero {
+    padding: 48px 8px 40px;
+  }
+
+  .hero h1 {
+    font-size: 45px;
+    letter-spacing: -2.5px;
+  }
+
+  .panel {
+    padding: 20px 16px;
+  }
+
+  .lang-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .country-columns {
+    grid-template-columns: 1fr;
+  }
+
+  #search {
+    width: 100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand-row">
+    <div class="brand">新闻比比看！</div>
+    <div class="tagline">天下为公 · 同一事件，不同媒体</div>
+  </div>
+
+  <nav id="nav">
+    <button data-page="home" class="active">首页</button>
+    <button data-page="all">总览新闻</button>
+    <button data-page="domestic">国内新闻</button>
+    <button data-page="international">国际新闻</button>
+    <button data-page="compare">同一事件比较</button>
+    <button data-page="sources">媒体目录</button>
+  </nav>
+</header>
+
+<main>
+
+<div class="toolbar">
+  <input id="search" placeholder="搜索新闻标题、媒体或关键词……">
+  <select id="sort">
+    <option value="new">最新优先</option>
+    <option value="old">最早优先</option>
+  </select>
+  <button class="btn" id="reload">重新载入新闻</button>
+</div>
+
+<div id="status">正在读取新闻数据……</div>
+
+<!-- HOME -->
+
+<section id="page-home">
+
+  <div class="hero">
+    <div class="eyebrow">NEWS · PERSPECTIVES · UNDERSTANDING</div>
+    <h1>同一件事 <br> python -m http.server 8000不同的视角</h1>
+    <p>跨越语言与地域，比较不同媒体如何报道世界。</p>
+    <div class="hero-note">天下为公 · 让信息更透明，让观点可比较</div>
+  </div>
+
+  <div class="panel">
+    <h2>马来西亚四语新闻</h2>
+    <p class="muted">四种语言并列，浏览不同媒体的报道。</p>
+    <div class="lang-grid" id="home-languages"></div>
+  </div>
+
+  <div class="panel">
+    <h2>今日重点事件</h2>
+    <p class="muted">标题相近的新闻候选，不代表已经确认是同一事件。</p>
+    <div id="home-events"></div>
+  </div>
+
+  <div class="panel">
+    <h2>最新新闻总览</h2>
+    <div id="home-latest"></div>
+  </div>
+
+</section>
+
+<!-- ALL NEWS -->
+
+<section id="page-all" class="hidden">
+  <div class="panel">
+    <h2>总览新闻</h2>
+    <p class="muted">国内与国际新闻全部汇总。</p>
+    <div id="all-list"></div>
+  </div>
+</section>
+
+<!-- DOMESTIC -->
+
+<section id="page-domestic" class="hidden">
+  <div class="panel">
+    <h2>马来西亚国内新闻</h2>
+    <p class="muted">选择语言，浏览该语言的媒体报道。</p>
+    <div class="country-actions" id="domestic-lang-buttons"></div>
+    <div id="domestic-list"></div>
+  </div>
+</section>
+
+<!-- INTERNATIONAL -->
+
+<section id="page-international" class="hidden">
+
+  <div class="panel">
+    <h2>国际新闻</h2>
+    <p class="muted">选择国家或地区，最多四个并列比较。</p>
+
+    <div class="cards" id="country-picker"></div>
+
+    <div class="country-actions">
+      <button class="btn" id="clear-countries">清除选择</button>
+      <span class="muted" id="selected-count">已选择 0 / 4</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>国际新闻总览</h2>
+    <div id="international-list"></div>
+  </div>
+
+  <div class="panel">
+    <h2>多国并列看板</h2>
+    <div id="country-columns" class="country-columns"></div>
+  </div>
+
+</section>
+
+<!-- COMPARE -->
+
+<section id="page-compare" class="hidden">
+  <div class="panel">
+    <h2>同一事件比较</h2>
+    <p class="muted">
+      当前版本展示新闻候选。真正的跨语言事件识别、
+      事实核对和 AI 深度比较尚未接入。
+    </p>
+    <div id="compare-candidates"></div>
+  </div>
+</section>
+
+<!-- SOURCES -->
+
+<section id="page-sources" class="hidden">
+  <div class="panel">
+    <h2>媒体目录</h2>
+    <p class="muted">按媒体名称汇总目前收集到的新闻。</p>
+    <div id="source-list"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  新闻比比看！· 天下为公<br>
+  请以原始媒体报道为准。
+</footer>
+
+<script>
+const LANGS = [
+  {id:"en",code:"EN",name:"English",label:"英文新闻"},
+  {id:"bm",code:"BM",name:"Bahasa Melayu",label:"马来文新闻"},
+  {id:"zh",code:"中文",name:"中文",label:"华文新闻"},
+  {id:"ta",code:"தமிழ்",name:"Tamil",label:"Tamil 新闻"}
+];
+
+const COUNTRIES = [
+  {id:"japan",name:"日本",en:"Japan",flag:"🇯🇵"},
+  {id:"korea",name:"韩国",en:"South Korea",flag:"🇰🇷"},
+  {id:"china",name:"中国",en:"China",flag:"🇨🇳"},
+  {id:"taiwan",name:"台湾",en:"Taiwan",flag:"🇹🇼"},
+  {id:"singapore",name:"新加坡",en:"Singapore",flag:"🇸🇬"},
+  {id:"usa",name:"美国",en:"United States",flag:"🇺🇸"},
+  {id:"uk",name:"英国",en:"United Kingdom",flag:"🇬🇧"},
+  {id:"eu",name:"欧盟",en:"European Union",flag:"🇪🇺"}
+];
+
+let items = [];
+let selectedCountries = [];
+let activeDomesticLang = "en";
+
+const $ = id => document.getElementById(id);
+
+function esc(s="") {
+  return String(s).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",
+    '"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function dateValue(x) {
+  let d = new Date(x || 0);
+  return isNaN(d) ? 0 : d.getTime();
+}
+
+function fmt(x) {
+  let d = new Date(x);
+  return isNaN(d) ? "时间未知" :
+    d.toLocaleString("zh-CN",{hour12:false});
+}
+
+function langOf(x) {
+  let l = String(x.l || x.lang || "").toLowerCase();
+
+  if(["en","english"].includes(l)) return "en";
+  if(["bm","ms","malay","bahasa melayu"].includes(l)) return "bm";
+  if(["zh","cn","chinese"].includes(l)) return "zh";
+  if(["ta","tamil"].includes(l)) return "ta";
+
+  return l;
+}
+
+function isDomestic(x) {
+  let c = String(x.country || x.region || "").toLowerCase();
+
+  return !c || [
+    "my","malaysia","马来西亚","国内","malaysian"
+  ].includes(c);
+}
+
+function countryId(x) {
+  let c = String(x.country || "").toLowerCase();
+
+  const map = {
+    japan:"japan","日本":"japan",jp:"japan",
+    korea:"korea","south korea":"korea","韩国":"korea",kr:"korea",
+    china:"china","中国":"china",cn:"china",
+    taiwan:"taiwan","台湾":"taiwan",tw:"taiwan",
+    singapore:"singapore","新加坡":"singapore",sg:"singapore",
+    usa:"usa","united states":"usa","美国":"usa",us:"usa",
+    uk:"uk","united kingdom":"uk","英国":"uk",
+    eu:"eu","european union":"eu","欧盟":"eu"
+  };
+
+  return map[c] || "";
+}
+
+function filtered(list) {
+  let q = $("search").value.trim().toLowerCase();
+
+  let a = list.filter(x =>
+    !q || [
+      x.h,x.title,x.o,x.source,x.summary
+    ].join(" ").toLowerCase().includes(q)
+  );
+
+  a.sort((x,y) =>
+    $("sort").value === "old"
+      ? dateValue(x.t)-dateValue(y.t)
+      : dateValue(y.t)-dateValue(x.t)
+  );
+
+  return a;
+}
+
+function article(x) {
+  let title = x.h || x.title || "无标题";
+  let source = x.o || x.source || "来源未知";
+  let url = x.u || x.url || "#";
+
+  return `
+    <article class="news-item">
+      <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">
+        ${esc(title)}
+      </a>
+      <div class="meta">
+        ${esc(source)} · ${esc(fmt(x.t || x.published))}
+        ${x.summary ? " · " + esc(x.summary) : ""}
+      </div>
+    </article>
+  `;
+}
+
+function renderList(el,list,empty="暂时没有符合条件的新闻。") {
+  let a = filtered(list);
+
+  $(el).innerHTML = a.length
+    ? a.map(article).join("")
+    : `<div class="empty">${empty}</div>`;
+}
+
+function domestic() {
+  return items.filter(isDomestic);
+}
+
+function international() {
+  return items.filter(x => !isDomestic(x) && countryId(x));
+}
+
+/* HOME */
+
+function renderHome() {
+
+  $("home-languages").innerHTML = LANGS.map(l => {
+
+    let arr = domestic().filter(x => langOf(x) === l.id);
+
+    return `
+      <div class="lang-col">
+        <h3>
+          <span class="code">${l.code}</span>
+          <span class="pill">${arr.length} 篇</span>
+        </h3>
+
+        <div class="muted">${l.name}</div>
+
+        ${
+          arr.slice()
+          .sort((a,b)=>dateValue(b.t)-dateValue(a.t))
+          .slice(0,5)
+          .map(article).join("")
+          || '<div class="empty">暂未收集到新闻</div>'
+        }
+
+        <button class="btn" data-lang="${l.id}">
+          更多 ${l.label}
+        </button>
+      </div>
+    `;
+
+  }).join("");
+
+  $("home-languages").querySelectorAll("[data-lang]")
+    .forEach(b => {
+      b.onclick = () => {
+        activeDomesticLang = b.dataset.lang;
+        showPage("domestic");
+        renderDomestic();
+      };
+    });
+
+  renderList("home-latest",domestic().slice(0,8));
+
+  let groups = new Map();
+
+  domestic().forEach(x => {
+    let key = (x.h || x.title || "").trim().toLowerCase().slice(0,65);
+
+    if(key) {
+      if(!groups.has(key)) groups.set(key,[]);
+      groups.get(key).push(x);
+    }
+  });
+
+  let candidates = [...groups.values()]
+    .filter(g => g.length > 1)
+    .slice(0,5);
+
+  $("home-events").innerHTML = candidates.length
+    ? candidates.map(g => `
+        <div class="news-item">
+          <strong>${esc(g[0].h || g[0].title)}</strong>
+          <div class="meta">
+            ${g.length} 篇标题相近的新闻
+          </div>
+        </div>
+      `).join("")
+    : '<div class="empty">暂时没有可显示的事件候选。</div>';
+}
+
+/* DOMESTIC */
+
+function renderDomestic() {
+
+  let arr = domestic().filter(x => langOf(x) === activeDomesticLang);
+
+  $("domestic-lang-buttons").innerHTML = LANGS.map(l => `
+    <button class="btn" data-lang="${l.id}">
+      ${l.code} · ${l.name}
+    </button>
+  `).join("");
+
+  $("domestic-lang-buttons").querySelectorAll("button")
+    .forEach(b => {
+      b.onclick = () => {
+        activeDomesticLang = b.dataset.lang;
+        renderDomestic();
+      };
+    });
+
+  let sources = [...new Set(
+    arr.map(x => x.o || x.source).filter(Boolean)
+  )];
+
+  $("domestic-list").innerHTML = `
+    <div class="stat">
+      ${sources.map(s => `<span>${esc(s)}</span>`).join("")}
+    </div>
+  `;
+
+  let div = document.createElement("div");
+
+  div.innerHTML = filtered(arr).map(article).join("")
+    || '<div class="empty">暂时没有新闻。</div>';
+
+  $("domestic-list").appendChild(div);
+}
+
+/* INTERNATIONAL */
+
+function renderInternational() {
+
+  $("country-picker").innerHTML = COUNTRIES.map(c => `
+    <button class="country ${
+      selectedCountries.includes(c.id) ? "selected" : ""
+    }" data-country="${c.id}">
+      <strong>${c.flag} ${c.name}</strong>
+      <span>${c.en}</span>
+    </button>
+  `).join("");
+
+  $("country-picker").querySelectorAll("button")
+    .forEach(b => {
+
+      b.onclick = () => {
+
+        let id = b.dataset.country;
+
+        if(selectedCountries.includes(id)) {
+          selectedCountries = selectedCountries.filter(x => x !== id);
+        } else if(selectedCountries.length < 4) {
+          selectedCountries.push(id);
+        } else {
+          alert("最多同时选择四个国家／地区。");
+        }
+
+        renderInternational();
+      };
+
+    });
+
+  $("selected-count").textContent =
+    `已选择 ${selectedCountries.length} / 4`;
+
+  let arr = international().filter(x =>
+    !selectedCountries.length ||
+    selectedCountries.includes(countryId(x))
+  );
+
+  renderList(
+    "international-list",
+    arr,
+    "没有对应国家的新闻。请检查新闻来源设置。"
+  );
+
+  $("country-columns").innerHTML = selectedCountries.length
+    ? selectedCountries.map(id => {
+
+        let c = COUNTRIES.find(x => x.id === id);
+
+        let news = international().filter(x =>
+          countryId(x) === id
+        );
+
+        return `
+          <div class="country-column">
+            <h3>${c.flag} ${c.name}</h3>
+            <div class="muted">${news.length} 篇新闻</div>
+
+            ${
+              news.slice()
+              .sort((a,b)=>dateValue(b.t)-dateValue(a.t))
+              .slice(0,8)
+              .map(article).join("")
+              || '<div class="empty">暂无新闻</div>'
+            }
+          </div>
+        `;
+
+      }).join("")
+    : '<div class="empty">选择最多四个国家／地区，即可并列浏览。</div>';
+}
+
+/* COMPARE */
+
+function renderCompare() {
+
+  let a = filtered(items).slice(0,20);
+
+  $("compare-candidates").innerHTML = a.length
+    ? a.map(x => `
+        <div class="news-item">
+          <strong>${esc(x.h || x.title || "无标题")}</strong>
+          <div class="meta">
+            ${esc(x.o || x.source || "")} · ${esc(fmt(x.t))}
+          </div>
+        </div>
+      `).join("")
+    : '<div class="empty">暂无新闻。</div>';
+}
+
+/* SOURCES */
+
+function renderSources() {
+
+  let m = new Map();
+
+  items.forEach(x => {
+    let k = x.o || x.source || "来源未知";
+    m.set(k,(m.get(k)||0)+1);
+  });
+
+  $("source-list").innerHTML = [...m]
+    .sort((a,b)=>b[1]-a[1])
+    .map(([s,n]) => `
+      <div class="news-item">
+        <strong>${esc(s)}</strong>
+        <span class="pill">${n} 篇</span>
+      </div>
+    `).join("")
+    || '<div class="empty">暂无媒体数据。</div>';
+}
+
+/* PAGE NAVIGATION */
+
+function showPage(p) {
+
+  document.querySelectorAll("main section")
+    .forEach(s => s.classList.add("hidden"));
+
+  $("page-"+p).classList.remove("hidden");
+
+  document.querySelectorAll("nav button")
+    .forEach(b => b.classList.toggle(
+      "active",b.dataset.page === p
+    ));
+}
+
+/* LOAD NEWS */
+
+async function load() {
+
+  try {
+
+    let r = await fetch("./news.json?ts="+Date.now());
+
+    if(!r.ok) throw Error("HTTP "+r.status);
+
+    let data = await r.json();
+
+    items = Array.isArray(data) ? data : (data.items || []);
+
+    $("status").textContent =
+      `已载入 ${items.length} 篇新闻 · 更新：${
+        data.updated_at || data.updated || "未知"
+      }`;
+
+  } catch(e) {
+
+    items = [];
+
+    $("status").textContent =
+      "无法读取 news.json："+e.message+
+      "。请先运行 fetch_news.py。";
+
+  }
+
+  renderHome();
+  renderList("all-list",items);
+  renderDomestic();
+  renderInternational();
+  renderCompare();
+  renderSources();
+}
+
+/* EVENTS */
+
+document.querySelectorAll("nav button").forEach(b => {
+  b.onclick = () => showPage(b.dataset.page);
+});
+
+$("search").addEventListener("input",() => {
+  renderHome();
+  renderList("all-list",items);
+  renderDomestic();
+  renderInternational();
+  renderCompare();
+  renderSources();
+});
+
+$("sort").addEventListener("change",() => {
+  renderHome();
+  renderList("all-list",items);
+  renderDomestic();
+  renderInternational();
+});
+
+$("reload").onclick = load;
+
+$("clear-countries").onclick = () => {
+  selectedCountries = [];
+  renderInternational();
+};
+
+load();
+</script>
+
+</body>
+</html>
