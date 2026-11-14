@@ -1,461 +1,194 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>新闻比比看！</title>
-
 <style>
 :root {
-  --black: #1d1d1f;
-  --gray: #6e6e73;
-  --light: #f5f5f7;
-  --white: #fff;
-  --blue: #06c;
-  --border: #e5e5e8;
-  --radius: 22px;
+  --black:#1d1d1f;--gray:#86868b;--light:#f5f5f7;
+  --white:#fff;--blue:#0071e3;--border:rgba(0,0,0,.08);
+  --radius:26px;
 }
-
-* { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  margin: 0;
-  background: var(--light);
-  color: var(--black);
-  font-family: -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Noto Sans", sans-serif;
-  -webkit-font-smoothing: antialiased;
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:#f5f5f7;color:var(--black);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",sans-serif;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.01em;
 }
-
-button, input, select { font: inherit; }
-
-/* NAVIGATION */
-
-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(255,255,255,.86);
-  backdrop-filter: saturate(180%) blur(22px);
-  border-bottom: 1px solid rgba(0,0,0,.07);
-  padding: 0 max(20px, calc((100% - 1180px)/2));
+button,input,select{font:inherit}
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(251,251,253,.82);
+  backdrop-filter:saturate(180%) blur(24px);
+  border-bottom:1px solid rgba(0,0,0,.08);
+  padding:0 max(20px,calc((100% - 1180px)/2));
 }
-
-.brand-row {
-  height: 55px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.brand-row{height:55px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:17px;font-weight:700;letter-spacing:-.45px}
+.tagline{font-size:12px;color:var(--gray)}
+nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:11px;scrollbar-width:none}
+nav button{
+  border:0;background:transparent;border-radius:999px;padding:9px 13px;
+  color:#424245;cursor:pointer;white-space:nowrap;font-size:12px;transition:.2s
 }
-
-.brand {
-  font-size: 18px;
-  font-weight: 750;
-  letter-spacing: -.7px;
+nav button:hover{background:#f0f0f2}
+nav button.active{background:#1d1d1f;color:#fff}
+main{max-width:1240px;margin:auto;padding:22px 24px 65px}
+.hidden{display:none!important}
+.panel{
+  background:#fff;border:0;border-radius:28px;
+  padding:clamp(22px,3vw,38px);margin:22px 0;
+  box-shadow:0 2px 12px rgba(0,0,0,.025)
 }
-
-.tagline {
-  font-size: 12px;
-  color: var(--gray);
+h1,h2,h3,p{margin-top:0}
+h2{font-size:clamp(25px,3vw,34px);font-weight:700;letter-spacing:-.055em;line-height:1.2;margin-bottom:12px}
+h3{font-size:16px;font-weight:650;letter-spacing:-.025em}
+.muted{color:var(--gray);font-size:13px;line-height:1.7}
+.hero{padding:clamp(82px,12vw,145px) 20px 105px;text-align:center}
+.eyebrow{color:#6e6e73;font-size:11px;font-weight:650;letter-spacing:3.2px;margin-bottom:22px}
+.hero h1{
+  font-size:clamp(52px,9vw,104px);line-height:.99;
+  letter-spacing:-.075em;font-weight:750;color:#1d1d1f;margin-bottom:28px
 }
-
-nav {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 11px;
-  scrollbar-width: none;
+.hero p{color:#6e6e73;font-size:clamp(17px,2.1vw,23px);line-height:1.5;max-width:650px;margin:auto}
+.hero-note{color:#86868b;margin-top:28px;font-size:12px;letter-spacing:.02em}
+.toolbar{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+input,select{
+  border:1px solid rgba(0,0,0,.12);border-radius:30px;
+  padding:12px 17px;background:rgba(255,255,255,.92);outline:none;font-size:14px
 }
-
-nav button {
-  border: 0;
-  background: transparent;
-  border-radius: 30px;
-  padding: 9px 14px;
-  color: #424245;
-  cursor: pointer;
-  white-space: nowrap;
-  font-size: 13px;
-  transition: .2s;
+input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,102,204,.1)}
+#search{flex:1;min-width:220px}
+.btn{
+  border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:30px;
+  padding:10px 17px;cursor:pointer;font-size:13px;font-weight:550;transition:.2s
 }
-
-nav button:hover { background: #f0f0f2; }
-
-nav button.active {
-  background: var(--black);
-  color: white;
+.btn:hover{background:#f5f5f7}
+#status{color:var(--gray);font-size:12px;padding:5px 3px 15px}
+.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:25px}
+.lang-col{
+  border:1px solid rgba(0,0,0,.06);border-radius:22px;
+  padding:20px;background:#fbfbfd;min-width:0;
+  transition:transform .25s ease,box-shadow .25s ease
 }
-
-/* GENERAL */
-
-main {
-  max-width: 1180px;
-  margin: auto;
-  padding: 28px 24px 65px;
+.lang-col:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.055)}
+.lang-col h3{display:flex;justify-content:space-between;align-items:center}
+.lang-col .code{font-size:27px;font-weight:750;letter-spacing:-.06em}
+.language-news-scroll{
+  max-height:430px;overflow-y:auto;overflow-x:hidden;padding-right:8px;
+  overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b8b8bd transparent
 }
-
-.hidden { display: none !important; }
-
-.panel {
-  background: white;
-  border: 1px solid rgba(0,0,0,.045);
-  border-radius: var(--radius);
-  padding: 30px;
-  margin: 18px 0;
-  box-shadow: 0 4px 22px rgba(0,0,0,.025);
+.language-news-scroll::-webkit-scrollbar,.country-column::-webkit-scrollbar{width:7px}
+.language-news-scroll::-webkit-scrollbar-thumb,.country-column::-webkit-scrollbar-thumb{
+  background:#b8b8bd;border-radius:20px
 }
-
-h1, h2, h3, p { margin-top: 0; }
-
-h2 {
-  font-size: clamp(24px, 3vw, 32px);
-  letter-spacing: -1.2px;
-  line-height: 1.2;
-  margin-bottom: 12px;
+.pill{background:#f0f0f2;padding:5px 10px;border-radius:30px;font-size:11px;color:#6e6e73}
+.news-item{padding:17px 0;border-top:1px solid rgba(0,0,0,.07)}
+.news-item a{
+  color:var(--black);text-decoration:none;font-weight:620;
+  line-height:1.55;display:inline-block;font-size:14px
 }
-
-h3 {
-  font-size: 17px;
-  letter-spacing: -.4px;
+.news-item a:hover{color:var(--blue)}
+.meta{color:#86868b;font-size:11px;margin-top:7px;line-height:1.6;overflow-wrap:anywhere}
+.empty{padding:25px 10px;text-align:center;color:var(--gray);font-size:13px}
+.scrollable-news{
+  max-height:560px;overflow-y:auto;overflow-x:hidden;padding-right:10px;
+  overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b8b8bd transparent
 }
-
-.muted {
-  color: var(--gray);
-  font-size: 13px;
-  line-height: 1.7;
+.scrollable-news::-webkit-scrollbar{width:7px}
+.scrollable-news::-webkit-scrollbar-thumb{background:#b8b8bd;border-radius:20px}
+.scrollable-news::-webkit-scrollbar-track{background:transparent}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.country{
+  border:1px solid rgba(0,0,0,.07);background:#fbfbfd;border-radius:20px;
+  padding:20px;text-align:left;cursor:pointer;transition:.2s;min-height:95px
 }
-
-/* HERO */
-
-.hero {
-  padding: 85px 20px 75px;
-  text-align: center;
+.country:hover{transform:translateY(-3px);box-shadow:0 10px 25px rgba(0,0,0,.06)}
+.country.selected{border:1.5px solid #0071e3;background:#f0f7ff}
+.country strong{display:block;font-size:17px;margin-bottom:6px}
+.country span{color:var(--gray);font-size:12px}
+.country-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0}
+.country-actions .btn.selected{background:#0071e3;color:white;border-color:#0071e3}
+.country-actions .pill{margin-left:4px}
+.country-columns{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.country-column{
+  background:#fbfbfd;border:1px solid rgba(0,0,0,.06);border-radius:20px;
+  padding:17px;min-width:0;max-height:430px;overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b8b8bd transparent
 }
-
-.eyebrow {
-  color: var(--gray);
-  font-size: 12px;
-  letter-spacing: 3px;
-  margin-bottom: 22px;
+.country-column::-webkit-scrollbar{width:7px}
+.country-column::-webkit-scrollbar-thumb{background:#b8b8bd;border-radius:20px}
+.country-column .news-item{padding:12px 0}
+.country-column .news-item a{font-size:13px}
+footer{
+  max-width:1180px;margin:auto;padding:12px 24px 35px;
+  text-align:center;color:#86868b;font-size:11px;line-height:1.7
 }
-
-.hero h1 {
-  font-size: clamp(45px, 8vw, 86px);
-  line-height: 1.05;
-  letter-spacing: -5px;
-  font-weight: 750;
-  margin-bottom: 25px;
+.compare-hero{padding:clamp(66px,9vw,112px) 18px 62px;text-align:center}
+.compare-eyebrow,.compare-kicker{color:#86868b;font-size:10px;font-weight:700;letter-spacing:3px}
+.compare-hero h1{
+  margin:18px 0;color:#1d1d1f;font-size:clamp(42px,7vw,76px);
+  line-height:1.03;font-weight:750;letter-spacing:-.07em
 }
-
-.hero p {
-  color: var(--gray);
-  font-size: clamp(17px, 2vw, 22px);
-  max-width: 650px;
-  margin: auto;
+.compare-hero h1 span{color:#86868b}
+.compare-hero p{max-width:620px;margin:0 auto;color:#6e6e73;font-size:clamp(16px,2vw,20px);line-height:1.55}
+.compare-panel{padding:clamp(22px,3.2vw,40px)}
+.compare-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;margin-bottom:22px}
+.compare-panel-heading h2{margin:9px 0 8px;font-size:clamp(25px,3vw,34px);letter-spacing:-.055em}
+.compare-panel-heading .muted{max-width:720px;line-height:1.65}
+.compare-count-note{padding:8px 13px;border-radius:999px;background:#f5f5f7;color:#6e6e73;font-size:11px;white-space:nowrap}
+.compare-candidate-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.compare-candidate-list .news-item{
+  display:flex;flex-direction:column;justify-content:space-between;min-height:138px;
+  margin:0;padding:21px;border:1px solid rgba(0,0,0,.07);
+  border-radius:20px;background:#fbfbfd;transition:.22s
 }
-
-.hero-note {
-  margin-top: 25px;
-  font-size: 12px;
-  color: var(--gray);
+.compare-candidate-list .news-item:hover{transform:translateY(-3px);background:#fff;box-shadow:0 12px 28px rgba(0,0,0,.055)}
+.compare-candidate-list .news-item strong{display:block;color:#1d1d1f;font-size:15px;line-height:1.55;font-weight:650}
+.compare-candidate-list .news-item .meta{margin-top:18px;color:#86868b;font-size:11px;line-height:1.5}
+.compare-candidate-list .empty{grid-column:1/-1;padding:50px 20px;border-radius:20px;background:#fbfbfd}
+.compare-controls{display:grid;grid-template-columns:minmax(220px,1.6fr) repeat(2,minmax(150px,.8fr));gap:10px;margin:22px 0 12px}
+.compare-controls input,.compare-controls select{width:100%;min-width:0;border:1px solid #d2d2d7;border-radius:12px;background:#fff;color:#1d1d1f;padding:13px 14px;outline:none}
+.compare-result-line{color:#86868b;font-size:12px;margin:10px 0 16px}
+.compare-story{gap:10px}
+.compare-story a{color:inherit;text-decoration:none}
+.compare-story-tags{display:flex;flex-wrap:wrap;gap:6px}
+.compare-story-tags span{background:#f0f0f2;color:#6e6e73;border-radius:99px;padding:5px 9px;font-size:10px}
+.compare-timeline{display:flex;flex-direction:column;gap:0}
+.timeline-item{display:grid;grid-template-columns:175px 1fr;gap:18px;padding:17px 0;border-bottom:1px solid #eeeef0}
+.timeline-date{color:#86868b;font-size:12px}
+.timeline-content strong{font-size:14px;line-height:1.5}
+.timeline-content .meta{margin-top:6px;color:#86868b;font-size:11px}
+@media(max-width:900px){
+  .lang-grid,.cards{grid-template-columns:repeat(2,1fr)}
+  .country-columns{grid-template-columns:repeat(2,1fr)}
 }
-
-/* TOOLBAR */
-
-.toolbar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
+@media(max-width:680px){
+  .compare-hero{padding:58px 8px 42px}
+  .compare-hero h1{font-size:clamp(39px,11vw,56px)}
+  .compare-panel-heading{flex-direction:column}
+  .compare-candidate-list{grid-template-columns:1fr}
+  .compare-candidate-list .news-item{min-height:116px}
+  .compare-controls{grid-template-columns:1fr}
+  .timeline-item{grid-template-columns:1fr;gap:5px}
 }
-
-input, select {
-  border: 1px solid #d2d2d7;
-  border-radius: 30px;
-  padding: 12px 17px;
-  background: white;
-  outline: none;
-  font-size: 14px;
-}
-
-input:focus, select:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(0,102,204,.1);
-}
-
-#search {
-  flex: 1;
-  min-width: 220px;
-}
-
-.btn {
-  border: 1px solid #d2d2d7;
-  background: white;
-  border-radius: 30px;
-  padding: 9px 15px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: .2s;
-}
-
-.btn:hover { background: #f0f0f2; }
-
-#status {
-  color: var(--gray);
-  font-size: 12px;
-  padding: 5px 3px 15px;
-}
-
-/* LANGUAGE */
-
-.lang-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-top: 25px;
-}
-
-.lang-col {
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 19px;
-  background: white;
-  min-width: 0;
-  transition: .25s;
-}
-
-.lang-col:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0,0,0,.06);
-}
-
-.lang-col h3 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.lang-col .code {
-  font-size: 25px;
-  font-weight: 750;
-}
-
-.pill {
-  background: #f0f0f2;
-  padding: 5px 10px;
-  border-radius: 30px;
-  font-size: 11px;
-  color: #555;
-}
-
-/* NEWS */
-
-.news-item {
-  padding: 15px 0;
-  border-top: 1px solid #ededf0;
-}
-
-.news-item a {
-  color: var(--black);
-  text-decoration: none;
-  font-weight: 620;
-  line-height: 1.5;
-  display: inline-block;
-}
-
-.news-item a:hover { color: var(--blue); }
-
-.meta {
-  color: var(--gray);
-  font-size: 12px;
-  margin-top: 7px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
-.empty {
-  padding: 25px 10px;
-  text-align: center;
-  color: var(--gray);
-  font-size: 13px;
-}
-
-/* SCROLLABLE NEWS */
-
-.scrollable-news {
-  max-height: 560px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 10px;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #b8b8bd transparent;
-}
-
-.scrollable-news::-webkit-scrollbar { width: 7px; }
-
-.scrollable-news::-webkit-scrollbar-thumb {
-  background: #b8b8bd;
-  border-radius: 20px;
-}
-
-.scrollable-news::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* COUNTRIES */
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 13px;
-}
-
-.country {
-  border: 1px solid var(--border);
-  background: white;
-  border-radius: 18px;
-  padding: 20px;
-  text-align: left;
-  cursor: pointer;
-  transition: .2s;
-  min-height: 95px;
-}
-
-.country:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(0,0,0,.06);
-}
-
-.country.selected {
-  border: 1.5px solid var(--blue);
-  background: #f2f8ff;
-}
-
-.country strong {
-  display: block;
-  font-size: 17px;
-  margin-bottom: 6px;
-}
-
-.country span {
-  color: var(--gray);
-  font-size: 12px;
-}
-
-.country-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin: 18px 0;
-}
-
-.country-columns {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-
-.country-column {
-  background: #fafafa;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 17px;
-  min-width: 0;
-}.country-column {
-  background: #fafafa;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 17px;
-  min-width: 0;
-
-  /* 每个国家独立滑动 */
-  max-height: 650px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #b8b8bd transparent;
-}
-
-.country-column::-webkit-scrollbar {
-  width: 7px;
-}
-
-.country-column::-webkit-scrollbar-thumb {
-  background: #b8b8bd;
-  border-radius: 20px;
-}
-
-.country-column::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.country-column .news-item {
-  padding: 12px 0;
-}
-
-.country-column .news-item a {
-  font-size: 13px;
-}
-
-/* FOOTER */
-
-footer {
-  max-width: 1180px;
-  margin: auto;
-  padding: 0 24px 35px;
-  text-align: center;
-  color: var(--gray);
-  font-size: 11px;
-}
-
-/* RESPONSIVE */
-
-@media(max-width: 900px) {
-  .lang-grid, .cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .country-columns {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media(max-width: 600px) {
-  header { padding: 0 14px; }
-
-  .tagline { display: none; }
-
-  main { padding: 16px 13px 40px; }
-
-  .hero { padding: 48px 8px 40px; }
-
-  .hero h1 {
-    font-size: 45px;
-    letter-spacing: -2.5px;
-  }
-
-  .panel { padding: 20px 16px; }
-
-  .lang-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 9px;
-  }
-
-  .cards { grid-template-columns: repeat(2, 1fr); }
-
-  .country-columns { grid-template-columns: 1fr; }
-
-  #search { width: 100%; }
+@media(max-width:600px){
+  header{padding:0 14px}
+  .tagline{display:none}
+  main{padding:16px 13px 40px}
+  .hero{padding:68px 8px 58px}
+  .hero h1{font-size:clamp(44px,13vw,60px);letter-spacing:-.065em}
+  .panel{border-radius:22px;margin:14px 0;padding:22px 17px}
+  .brand{font-size:16px}
+  .lang-grid{grid-template-columns:repeat(2,1fr);gap:9px}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .country-columns{grid-template-columns:1fr}
+  #search{width:100%}
 }
 </style>
 </head>
-
 <body>
 
 <header>
@@ -463,7 +196,6 @@ footer {
     <div class="brand">新闻比比看！</div>
     <div class="tagline">天下为公 · 同一事件，不同媒体</div>
   </div>
-
   <nav id="nav">
     <button data-page="home" class="active">首页</button>
     <button data-page="all">总览新闻</button>
@@ -475,7 +207,6 @@ footer {
 </header>
 
 <main>
-
 <div class="toolbar">
   <input id="search" placeholder="搜索新闻标题、媒体或关键词……">
   <select id="sort">
@@ -484,105 +215,125 @@ footer {
   </select>
   <button class="btn" id="reload">重新载入新闻</button>
 </div>
-
 <div id="status">正在读取新闻数据……</div>
 
-<!-- HOME -->
-
 <section id="page-home">
-
   <div class="hero">
     <div class="eyebrow">NEWS · PERSPECTIVES · UNDERSTANDING</div>
     <h1>同一件事 <br> 不同的视角</h1>
     <p>跨越语言与地域，比较不同媒体如何报道世界。</p>
     <div class="hero-note">天下为公 · 让信息更透明，让观点可比较</div>
   </div>
-
   <div class="panel">
     <h2>🇲🇾 马来西亚四语新闻</h2>
     <p class="muted">四种语言并列，浏览不同媒体的报道。</p>
     <div class="lang-grid" id="home-languages"></div>
   </div>
-
+ 
   <div class="panel">
     <h2>今日重点事件</h2>
     <p class="muted">标题相近的新闻候选，不代表已经确认是同一事件。</p>
     <div id="home-events"></div>
   </div>
-
   <div class="panel">
     <h2>最新新闻总览</h2>
     <div id="home-latest" class="scrollable-news"></div>
   </div>
-
 </section>
-
-<!-- ALL NEWS -->
 
 <section id="page-all" class="hidden">
   <div class="panel">
-    <h2>总览新闻</h2>
-    <p class="muted">国内与国际新闻全部汇总。</p>
-    <div id="all-list" class="scrollable-news"></div>
+    <h2>🇲🇾 马来西亚国内新闻</h2>
+    <p class="muted">只显示来自马来西亚媒体的新闻。</p>
+    <div id="all-domestic-list" class="scrollable-news"></div>
+  </div>
+  <div class="panel">
+    <h2>🌍 国际新闻</h2>
+    <p class="muted">显示来自日本、韩国、中国、台湾、新加坡、美国、英国及欧盟等地区的新闻。</p>
+    <div id="all-international-list" class="scrollable-news"></div>
   </div>
 </section>
-
-<!-- DOMESTIC -->
 
 <section id="page-domestic" class="hidden">
   <div class="panel">
     <h2>🇲🇾 马来西亚国内新闻</h2>
     <p class="muted">选择语言，浏览该语言的媒体报道。</p>
     <div class="country-actions" id="domestic-lang-buttons"></div>
+    <h3>新闻版块</h3>
+    <p class="muted">按新闻主题分类；分类由标题和摘要关键词自动判断。</p>
+    <div class="country-actions" id="domestic-category-buttons"></div>
+    <div id="domestic-category-count" class="muted"></div>
     <div id="domestic-list" class="scrollable-news"></div>
   </div>
 </section>
 
-<!-- INTERNATIONAL -->
-
 <section id="page-international" class="hidden">
-
   <div class="panel">
     <h2>🌍 国际新闻</h2>
     <p class="muted">选择国家或地区，最多四个并列比较。</p>
-
     <div class="cards" id="country-picker"></div>
-
     <div class="country-actions">
       <button class="btn" id="clear-countries">清除选择</button>
       <span class="muted" id="selected-count">已选择 0 / 4</span>
     </div>
   </div>
-
-  <!-- 多国并列看板放在国家选择下面 -->
-
   <div class="panel">
     <h2>🌐 多国并列看板</h2>
     <p class="muted">最多选择四个国家或地区，同时浏览新闻。</p>
     <div id="country-columns" class="country-columns"></div>
   </div>
-
   <div class="panel">
     <h2>国际新闻总览</h2>
     <div id="international-list" class="scrollable-news"></div>
   </div>
-
 </section>
-
-<!-- COMPARE -->
 
 <section id="page-compare" class="hidden">
-  <div class="panel">
-    <h2>同一事件比较</h2>
-    <p class="muted">
-      当前版本展示新闻候选。真正的跨语言事件识别、
-      事实核对和 AI 深度比较尚未接入。
-    </p>
-    <div id="compare-candidates"></div>
+  <div class="compare-hero">
+    <div class="compare-eyebrow">NEWS COMPARISON</div>
+    <h1>同一事件，<span>不同视角。</span></h1>
+    <p>把不同媒体的报道放在一起，观察标题、来源与报道时间。</p>
+  </div>
+  <div class="panel compare-panel">
+    <div class="compare-panel-heading">
+      <div>
+        <div class="compare-kicker">COVERAGE OVERVIEW</div>
+        <h2>寻找同一事件的不同报道</h2>
+        <p class="muted">输入事件名称或关键词，再按国家和语言筛选。选择报道卡片可打开原始媒体文章。</p>
+      </div>
+      <div class="compare-count-note">最多显示 50 篇</div>
+    </div>
+    <div class="compare-controls">
+      <input id="compare-query" type="search" placeholder="搜索事件，例如：选举、地震、AI 政策……">
+      <select id="compare-country">
+        <option value="all">所有国家／地区</option>
+        <option value="malaysia">马来西亚</option>
+        <option value="japan">日本</option><option value="korea">韩国</option>
+        <option value="china">中国</option><option value="taiwan">台湾</option>
+        <option value="singapore">新加坡</option><option value="usa">美国</option>
+        <option value="uk">英国</option><option value="eu">欧盟</option>
+      </select>
+      <select id="compare-language">
+        <option value="all">所有语言</option>
+        <option value="en">英语</option><option value="bm">马来语</option>
+        <option value="zh">中文</option><option value="ta">Tamil</option>
+        <option value="ja">日语</option><option value="ko">韩语</option>
+      </select>
+    </div>
+    <div class="compare-result-line" id="compare-result-count"></div>
+    <div id="compare-candidates" class="compare-candidate-list"></div>
+  </div>
+  <div class="panel compare-panel">
+    <div class="compare-panel-heading">
+      <div>
+        <div class="compare-kicker">COVERAGE TIMELINE</div>
+        <h2>报道时间线</h2>
+        <p class="muted">按新闻发布时间排列，帮助观察不同媒体何时发布报道。</p>
+      </div>
+    </div>
+    <div id="compare-timeline" class="compare-timeline"></div>
   </div>
 </section>
-
-<!-- SOURCES -->
 
 <section id="page-sources" class="hidden">
   <div class="panel">
@@ -591,7 +342,6 @@ footer {
     <div id="source-list" class="scrollable-news"></div>
   </div>
 </section>
-
 </main>
 
 <footer>
@@ -621,6 +371,7 @@ const COUNTRIES = [
 let items = [];
 let selectedCountries = [];
 let activeDomesticLang = "en";
+let activeDomesticCategory = "all";
 
 const $ = id => document.getElementById(id);
 
@@ -649,6 +400,8 @@ function langOf(x) {
   if(["bm","ms","malay","bahasa melayu"].includes(l)) return "bm";
   if(["zh","cn","chinese"].includes(l)) return "zh";
   if(["ta","tamil"].includes(l)) return "ta";
+  if(["ja","japanese","日本語"].includes(l)) return "ja";
+  if(["ko","korean","한국어"].includes(l)) return "ko";
 
   return l;
 }
@@ -665,14 +418,35 @@ function countryId(x) {
   let c = String(x.country || "").toLowerCase();
 
   const map = {
-    japan:"japan","日本":"japan",jp:"japan",
-    korea:"korea","south korea":"korea","韩国":"korea",kr:"korea",
-    china:"china","中国":"china",cn:"china",
-    taiwan:"taiwan","台湾":"taiwan",tw:"taiwan",
-    singapore:"singapore","新加坡":"singapore",sg:"singapore",
-    usa:"usa","united states":"usa","美国":"usa",us:"usa",
-    uk:"uk","united kingdom":"uk","英国":"uk",
-    eu:"eu","european union":"eu","欧盟":"eu"
+    my:"malaysia",
+    malaysia:"malaysia",
+    "马来西亚":"malaysia",
+    japan:"japan",
+    "日本":"japan",
+    jp:"japan",
+    korea:"korea",
+    "south korea":"korea",
+    "韩国":"korea",
+    kr:"korea",
+    china:"china",
+    "中国":"china",
+    cn:"china",
+    taiwan:"taiwan",
+    "台湾":"taiwan",
+    tw:"taiwan",
+    singapore:"singapore",
+    "新加坡":"singapore",
+    sg:"singapore",
+    usa:"usa",
+    "united states":"usa",
+    "美国":"usa",
+    us:"usa",
+    uk:"uk",
+    "united kingdom":"uk",
+    "英国":"uk",
+    eu:"eu",
+    "european union":"eu",
+    "欧盟":"eu"
   };
 
   return map[c] || "";
@@ -689,8 +463,8 @@ function filtered(list) {
 
   a.sort((x,y) =>
     $("sort").value === "old"
-      ? dateValue(x.t)-dateValue(y.t)
-      : dateValue(y.t)-dateValue(x.t)
+      ? dateValue(x.t || x.published)-dateValue(y.t || y.published)
+      : dateValue(y.t || y.published)-dateValue(x.t || x.published)
   );
 
   return a;
@@ -701,13 +475,18 @@ function article(x) {
   let source = x.o || x.source || "来源未知";
   let url = x.u || x.url || "#";
 
+  const langName = ({
+    en:"英语",bm:"马来语",zh:"中文",
+    ta:"Tamil",ja:"日语",ko:"韩语"
+  })[langOf(x)] || langOf(x) || "语言未知";
+
   return `
     <article class="news-item">
       <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">
         ${esc(title)}
       </a>
       <div class="meta">
-        ${esc(source)} · ${esc(fmt(x.t || x.published))}
+        ${esc(source)} · ${esc(langName)} · ${esc(fmt(x.t || x.published))}
         ${x.summary ? " · " + esc(x.summary) : ""}
       </div>
     </article>
@@ -742,14 +521,13 @@ function renderHome() {
           <span class="code">${l.code}</span>
           <span class="pill">${arr.length} 篇</span>
         </h3>
-
         <div class="muted">${l.name}</div>
-
-        ${
-          filtered(arr).slice(0,5).map(article).join("")
-          || '<div class="empty">暂未收集到新闻</div>'
-        }
-
+        <div class="language-news-scroll">
+          ${
+            filtered(arr).map(article).join("")
+            || '<div class="empty">暂未收集到新闻</div>'
+          }
+        </div>
         <button class="btn" data-lang="${l.id}">
           更多 ${l.label}
         </button>
@@ -766,7 +544,7 @@ function renderHome() {
       };
     });
 
-  renderList("home-latest",domestic().slice(0,100));
+  renderList("home-latest",filtered(items).slice(0,100));
 
   let groups = new Map();
 
@@ -793,13 +571,123 @@ function renderHome() {
     : '<div class="empty">暂时没有可显示的事件候选。</div>';
 }
 
+/* MALAYSIA DOMESTIC NEWS CATEGORIES */
+
+const DOMESTIC_CATEGORIES = [
+  {id:"all",label:"全部"},
+  {id:"politics",label:"政治"},
+  {id:"economy",label:"经济"},
+  {id:"society",label:"社会"},
+  {id:"sports",label:"体育"},
+  {id:"entertainment",label:"娱乐"},
+  {id:"technology",label:"科技"},
+  {id:"education",label:"教育"},
+  {id:"health",label:"健康"},
+  {id:"transport",label:"交通"},
+  {id:"weather",label:"天气"},
+  {id:"crime",label:"治安／法庭"},
+  {id:"other",label:"其他"}
+];
+
+const CATEGORY_KEYWORDS = {
+  politics:[
+    "政府","部长","首相","国会","议会","选举","政党","政治","内阁","州政府","议员",
+    "government","minister","prime minister","parliament","election","politic","cabinet","mp ",
+    "kerajaan","menteri","perdana menteri","parlimen","pilihan raya","politik","kabinet",
+    "அரசு","அமைச்சர்","தேர்தல்","அரசியல்"
+  ],
+  economy:[
+    "经济","商业","市场","股市","股票","令吉","马币","通胀","通货膨胀","银行","投资","贸易","税务","预算案","薪水","工资",
+    "economy","economic","business","market","stocks","ringgit","inflation","bank","investment","trade","tax","budget","salary",
+    "ekonomi","perniagaan","pasaran","saham","ringgit","inflasi","bank","pelaburan","perdagangan","cukai","belanjawan","gaji",
+    "பொருளாதாரம்","வணிகம்","பங்குச் சந்தை","வங்கி"
+  ],
+  society:[
+    "社会","社区","民生","居民","人民","民众","生活费","物价","福利","慈善","公共服务",
+    "society","community","residents","public","cost of living","welfare",
+    "masyarakat","komuniti","penduduk","rakyat","kos sara hidup","kebajikan",
+    "சமூகம்","மக்கள்","பொது"
+  ],
+  sports:[
+    "体育","足球","篮球","羽毛球","网球","排球","赛车","羽球","运动员","联赛","世界杯","奥运","大马羽总",
+    "sports","football","soccer","basketball","badminton","tennis","volleyball","racing","athlete","league","olympic","world cup",
+    "sukan","bola sepak","badminton","bola keranjang","tenis","atlet","liga","olimpik",
+    "விளையாட்டு","கால்பந்து","கிரிக்கெட்","பூப்பந்து"
+  ],
+  entertainment:[
+    "娱乐","艺人","明星","演员","歌手","电影","电视剧","演唱会","音乐","综艺","网红","影坛","票房",
+    "entertainment","celebrity","actor","actress","singer","movie","film","concert","music","drama","showbiz",
+    "hiburan","selebriti","pelakon","penyanyi","filem","wayang","konsert","muzik",
+    "பொழுதுபோக்கு","நடிகர்","நடிகை","திரைப்படம்","இசை"
+  ],
+  technology:[
+    "科技","人工智能","人工智慧","AI","数码","网络安全","手机","电脑","软件","芯片","电信","互联网","创新",
+    "technology","artificial intelligence","cybersecurity","smartphone","computer","software","chip","telecommunications","internet","innovation",
+    "teknologi","kecerdasan buatan","keselamatan siber","telefon pintar","komputer","perisian","internet","inovasi",
+    "தொழில்நுட்பம்","செயற்கை நுண்ணறிவு","இணையம்"
+  ],
+  education:[
+    "教育","学校","大学","学生","教师","老师","考试","大学生","学费","课程","教育部","校园",
+    "education","school","university","student","teacher","exam","tuition","course","ministry of education","campus",
+    "pendidikan","sekolah","universiti","pelajar","guru","peperiksaan","yuran","kursus","kampus",
+    "கல்வி","பள்ளி","பல்கலைக்கழகம்","மாணவர்","ஆசிரியர்","தேர்வு"
+  ],
+  health:[
+    "健康","医疗","医院","医生","病患","疾病","疫情","卫生","药物","疫苗","卫生部","流感",
+    "health","medical","hospital","doctor","patient","disease","outbreak","ministry of health","vaccine","flu",
+    "kesihatan","perubatan","hospital","doktor","pesakit","penyakit","wabak","vaksin",
+    "சுகாதாரம்","மருத்துவம்","மருத்துவமனை","நோய்","தடுப்பூசி"
+  ],
+  transport:[
+    "交通","公路","大道","铁路","轻快铁","捷运","地铁","巴士","航班","机场","火车","车祸","陆路交通局",
+    "transport","traffic","highway","road","railway","lrt","mrt","bus","flight","airport","train","crash",
+    "pengangkutan","trafik","lebuh raya","jalan raya","kereta api","bas","penerbangan","lapangan terbang","kemalangan",
+    "போக்குவரத்து","சாலை","ரயில்","விமானம்"
+  ],
+  weather:[
+    "天气","气象","暴雨","水灾","洪水","闪电","雷雨","热浪","气温","季候风","台风",
+    "weather","met department","heavy rain","flood","thunderstorm","heatwave","temperature","monsoon","storm",
+    "cuaca","hujan lebat","banjir","ribut petir","gelombang haba","suhu","monsun",
+    "வானிலை","மழை","வெள்ளம்","புயல்"
+  ],
+  crime:[
+    "警方","警察","逮捕","拘捕","罪案","犯罪","法庭","法院","审讯","起诉","诈骗","贪污","反贪会","毒品","车祸死亡",
+    "police","arrest","crime","court","trial","charged","fraud","corruption","macc","drug","investigation",
+    "polis","tangkapan","jenayah","mahkamah","perbicaraan","didakwa","penipuan","rasuah","dadah","siasatan",
+    "காவல்துறை","கைது","குற்றம்","நீதிமன்றம்"
+  ]
+};
+
+function domesticCategory(x) {
+  const text = [
+    x.h || x.title || "",
+    x.summary || ""
+  ].join(" ").toLowerCase();
+
+  for(const category of DOMESTIC_CATEGORIES) {
+    if(category.id === "all" || category.id === "other") continue;
+
+    const words = CATEGORY_KEYWORDS[category.id] || [];
+
+    if(words.some(word => text.includes(word.toLowerCase()))) {
+      return category.id;
+    }
+  }
+
+  return "other";
+}
+
 /* DOMESTIC */
 
 function renderDomestic() {
-  let arr = domestic().filter(x => langOf(x) === activeDomesticLang);
+  let languageArr = domestic().filter(x => langOf(x) === activeDomesticLang);
+
+  let arr = activeDomesticCategory === "all"
+    ? languageArr
+    : languageArr.filter(x => domesticCategory(x) === activeDomesticCategory);
 
   $("domestic-lang-buttons").innerHTML = LANGS.map(l => `
-    <button class="btn" data-lang="${l.id}">
+    <button class="btn ${activeDomesticLang === l.id ? "selected" : ""}" data-lang="${l.id}">
       ${l.code} · ${l.name}
     </button>
   `).join("");
@@ -811,6 +699,34 @@ function renderDomestic() {
         renderDomestic();
       };
     });
+
+  $("domestic-category-buttons").innerHTML = DOMESTIC_CATEGORIES.map(c => {
+    const count = c.id === "all"
+      ? languageArr.length
+      : languageArr.filter(x => domesticCategory(x) === c.id).length;
+
+    return `
+      <button class="btn ${activeDomesticCategory === c.id ? "selected" : ""}"
+              data-category="${c.id}">
+        ${c.label} <span class="pill">${count}</span>
+      </button>
+    `;
+  }).join("");
+
+  $("domestic-category-buttons").querySelectorAll("button")
+    .forEach(b => {
+      b.onclick = () => {
+        activeDomesticCategory = b.dataset.category;
+        renderDomestic();
+      };
+    });
+
+  $("domestic-category-count").textContent =
+    `当前显示 ${arr.length} 篇 · ${
+      activeDomesticCategory === "all"
+        ? "全部版块"
+        : DOMESTIC_CATEGORIES.find(c => c.id === activeDomesticCategory)?.label || "全部版块"
+    }`;
 
   let sources = [...new Set(
     arr.map(x => x.o || x.source).filter(Boolean)
@@ -826,7 +742,7 @@ function renderDomestic() {
   renderList(
     "domestic-articles",
     arr,
-    "暂时没有这个语言的新闻。"
+    "这个语言／版块暂时没有相关新闻。"
   );
 
   $("domestic-articles").classList.add("scrollable-news");
@@ -897,18 +813,87 @@ function renderInternational() {
 /* COMPARE */
 
 function renderCompare() {
-  let a = filtered(items).slice(0,20);
+  const query = ($("compare-query")?.value || "").trim().toLowerCase();
+  const country = $("compare-country")?.value || "all";
+  const language = $("compare-language")?.value || "all";
 
-  $("compare-candidates").innerHTML = a.length
-    ? a.map(x => `
-        <div class="news-item">
-          <strong>${esc(x.h || x.title || "无标题")}</strong>
-          <div class="meta">
-            ${esc(x.o || x.source || "")} · ${esc(fmt(x.t))}
+  let a = items.filter(x => {
+    const title = x.h || x.title || "";
+
+    const text = [
+      title,
+      x.summary || "",
+      x.o || x.source || ""
+    ].join(" ").toLowerCase();
+
+    const countryMatch = country === "all" ||
+      (country === "malaysia" ? isDomestic(x) : countryId(x) === country);
+
+    const languageMatch = language === "all" || langOf(x) === language;
+
+    return (!query || text.includes(query)) && countryMatch && languageMatch;
+  });
+
+  a.sort((x,y) =>
+    dateValue(y.t || y.published) - dateValue(x.t || x.published)
+  );
+
+  const shown = a.slice(0,50);
+
+  $("compare-result-count").textContent =
+    `找到 ${a.length} 篇报道 · 当前显示 ${shown.length} 篇`;
+
+  $("compare-candidates").innerHTML = shown.length
+    ? shown.map(x => {
+        const title = x.h || x.title || "无标题";
+        const source = x.o || x.source || "来源未知";
+        const url = x.u || x.url || "#";
+
+        const countryName = isDomestic(x)
+          ? "马来西亚"
+          : (COUNTRIES.find(c => c.id === countryId(x))?.name || x.country || "国家未知");
+
+        const langName = ({
+          en:"英语",
+          bm:"马来语",
+          zh:"中文",
+          ta:"Tamil",
+          ja:"日语",
+          ko:"韩语"
+        })[langOf(x)] || langOf(x) || "语言未知";
+
+        return `
+          <article class="news-item compare-story">
+            <div class="compare-story-tags">
+              <span>${esc(countryName)}</span>
+              <span>${esc(langName)}</span>
+            </div>
+            <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">
+              <strong>${esc(title)}</strong>
+            </a>
+            <div class="meta">
+              ${esc(source)} · ${esc(fmt(x.t || x.published))}
+            </div>
+          </article>
+        `;
+      }).join("")
+    : '<div class="empty">没有找到符合条件的报道。试试更短的关键词，或清除筛选条件。</div>';
+
+  const timeline = [...shown].sort((x,y) =>
+    dateValue(x.t || x.published) - dateValue(y.t || y.published)
+  );
+
+  $("compare-timeline").innerHTML = timeline.length
+    ? timeline.map(x => `
+        <div class="timeline-item">
+          <div class="timeline-date">${esc(fmt(x.t || x.published))}</div>
+          <div class="timeline-content">
+            <strong>${esc(x.h || x.title || "无标题")}</strong>
+            <div class="meta">${esc(x.o || x.source || "来源未知")}</div>
           </div>
         </div>
       `).join("")
-    : '<div class="empty">暂无新闻。</div>';
+    : '<div class="empty">暂无可显示的时间线。</div>';
 }
 
 /* SOURCES */
@@ -922,7 +907,7 @@ function renderSources() {
   });
 
   $("source-list").innerHTML = [...m]
-    .sort((a,b)=>b[1]-a[1])
+    .sort((a,b) => b[1]-a[1])
     .map(([s,n]) => `
       <div class="news-item">
         <strong>${esc(s)}</strong>
@@ -948,35 +933,60 @@ function showPage(p) {
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-/* LOAD NEWS */
+/* ==========================================
+   FETCH NEWS DATA
+========================================== */
 
 async function load() {
-  $("status").textContent = "正在读取新闻数据……";
+  const status = $("status");
+
+  status.textContent = "正在读取新闻数据……";
 
   try {
-    let r = await fetch("./news.json?ts="+Date.now());
+    const response = await fetch(
+      "./news.json?ts=" + Date.now(),
+      {
+        method: "GET",
+        cache: "no-store"
+      }
+    );
 
-    if(!r.ok) throw Error("HTTP "+r.status);
+    if(!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
 
-    let data = await r.json();
+    const data = await response.json();
 
-    items = Array.isArray(data) ? data : (data.items || []);
+    // 支持数组及对象格式
+    items = Array.isArray(data)
+      ? data
+      : (Array.isArray(data.items) ? data.items : []);
 
-    $("status").textContent =
+    // 按发布时间排序
+    items.sort((a,b) =>
+      dateValue(b.t || b.published) -
+      dateValue(a.t || a.published)
+    );
+
+    status.textContent =
       `已载入 ${items.length} 篇新闻 · 更新：${
         data.updated_at || data.updated || "未知"
       }`;
 
-  } catch(e) {
+  } catch(error) {
     items = [];
 
-    $("status").textContent =
-      "无法读取 news.json："+e.message+
-      "。请先运行新闻更新程序。";
+    console.error("Fetch 新闻失败：",error);
+
+    status.textContent =
+      "无法读取 news.json：" + error.message +
+      "。请检查文件或新闻更新程序。";
   }
 
+  // 更新所有页面
   renderHome();
-  renderList("all-list",items);
+  renderList("all-domestic-list",domestic());
+  renderList("all-international-list",international());
   renderDomestic();
   renderInternational();
   renderCompare();
@@ -991,7 +1001,8 @@ document.querySelectorAll("nav button").forEach(b => {
 
 $("search").addEventListener("input",() => {
   renderHome();
-  renderList("all-list",items);
+  renderList("all-domestic-list",domestic());
+  renderList("all-international-list",international());
   renderDomestic();
   renderInternational();
   renderCompare();
@@ -1000,7 +1011,8 @@ $("search").addEventListener("input",() => {
 
 $("sort").addEventListener("change",() => {
   renderHome();
-  renderList("all-list",items);
+  renderList("all-domestic-list",domestic());
+  renderList("all-international-list",international());
   renderDomestic();
   renderInternational();
   renderCompare();
@@ -1008,13 +1020,26 @@ $("sort").addEventListener("change",() => {
 
 $("reload").onclick = load;
 
+["compare-query","compare-country","compare-language"].forEach(id => {
+  const control = $(id);
+
+  if(control) {
+    control.addEventListener("input",renderCompare);
+  }
+
+  if(control && control.tagName === "SELECT") {
+    control.addEventListener("change",renderCompare);
+  }
+});
+
 $("clear-countries").onclick = () => {
   selectedCountries = [];
   renderInternational();
 };
 
+// 首次载入新闻
 load();
-</script>
 
+</script>
 </body>
 </html>
