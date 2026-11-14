@@ -3,199 +3,1391 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f5f7">
 <title>新闻比比看！</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 <style>
-:root {
-  --black:#1d1d1f;--gray:#86868b;--light:#f5f5f7;
-  --white:#fff;--blue:#0071e3;--border:rgba(0,0,0,.08);
+:root{
+  --black:#1d1d1f;
+  --gray:#86868b;
+  --light:#f5f5f7;
+  --white:#fff;
+  --blue:#0071e3;
+  --border:rgba(0,0,0,.075);
+  --glass:rgba(255,255,255,.72);
   --radius:26px;
+  --shadow:0 8px 35px rgba(0,0,0,.045);
+  --shadow-hover:0 16px 42px rgba(0,0,0,.085);
 }
+
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;background:#f5f5f7;color:var(--black);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",sans-serif;
-  -webkit-font-smoothing:antialiased;letter-spacing:-.01em;
+
+html{
+  scroll-behavior:smooth;
+  scrollbar-color:#c7c7cc transparent;
 }
-button,input,select{font:inherit}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse at 10% 0%,rgba(220,232,255,.55),transparent 36%),
+    radial-gradient(ellipse at 95% 25%,rgba(236,229,255,.42),transparent 34%),
+    #f5f5f7;
+  color:var(--black);
+  -webkit-font-smoothing:antialiased;
+  letter-spacing:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+
+/* 只有标题使用楷体 */
+h1,h2,h3,h4,h5,h6,
+.hero-title,
+.section-title,
+.compare-hero h1,
+.monarch-hero h1,
+.monarch-name,
+.guide-hero h1,
+.election-hero h1{
+  font-family:"KaiTi","楷体","STKaiti","KaiTi_GB2312",serif;
+}
+
+button,input,select,textarea{
+  font:inherit;
+}
+
+button{-webkit-tap-highlight-color:transparent}
+
 header{
-  position:sticky;top:0;z-index:100;
-  background:rgba(251,251,253,.82);
-  backdrop-filter:saturate(180%) blur(24px);
-  border-bottom:1px solid rgba(0,0,0,.08);
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:rgba(250,250,252,.76);
+  -webkit-backdrop-filter:saturate(180%) blur(28px);
+  backdrop-filter:saturate(180%) blur(28px);
+  border-bottom:1px solid rgba(255,255,255,.65);
+  box-shadow:0 4px 22px rgba(0,0,0,.025);
   padding:0 max(20px,calc((100% - 1180px)/2));
 }
-.brand-row{height:55px;display:flex;justify-content:space-between;align-items:center}
-.brand{font-size:17px;font-weight:700;letter-spacing:-.45px}
-.tagline{font-size:12px;color:var(--gray)}
-nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:11px;scrollbar-width:none}
+
+.brand-row{
+  height:55px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.brand{
+  font-size:17px;
+  font-weight:750;
+}
+
+.tagline{
+  font-size:12px;
+  color:var(--gray);
+}
+
+nav{
+  display:flex;
+  gap:5px;
+  overflow-x:auto;
+  padding-bottom:10px;
+  scrollbar-width:none;
+}
+
+nav::-webkit-scrollbar{display:none}
+
 nav button{
-  border:0;background:transparent;border-radius:999px;padding:9px 13px;
-  color:#424245;cursor:pointer;white-space:nowrap;font-size:12px;transition:.2s
+  border:1px solid transparent;
+  background:transparent;
+  border-radius:999px;
+  padding:9px 14px;
+  color:#424245;
+  cursor:pointer;
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:550;
+  transition:.22s;
 }
-nav button:hover{background:#f0f0f2}
-nav button.active{background:#1d1d1f;color:#fff}
-main{max-width:1240px;margin:auto;padding:22px 24px 65px}
+
+nav button:hover{
+  background:rgba(255,255,255,.8);
+  border-color:rgba(0,0,0,.05);
+}
+
+nav button.active{
+  background:rgba(29,29,31,.92);
+  color:white;
+  box-shadow:0 3px 12px rgba(0,0,0,.13);
+}
+
+main{
+  max-width:1240px;
+  margin:auto;
+  padding:22px 24px 65px;
+}
+
 .hidden{display:none!important}
+
 .panel{
-  background:#fff;border:0;border-radius:28px;
-  padding:clamp(22px,3vw,38px);margin:22px 0;
-  box-shadow:0 2px 12px rgba(0,0,0,.025)
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(22px) saturate(170%);
+  backdrop-filter:blur(22px) saturate(170%);
+  border:1px solid rgba(255,255,255,.82);
+  border-radius:28px;
+  padding:clamp(22px,3vw,38px);
+  margin:22px 0;
+  box-shadow:var(--shadow);
+  transition:box-shadow .25s ease;
 }
+
+.panel:hover{box-shadow:var(--shadow-hover)}
+
 h1,h2,h3,p{margin-top:0}
-h2{font-size:clamp(25px,3vw,34px);font-weight:700;letter-spacing:-.055em;line-height:1.2;margin-bottom:12px}
-h3{font-size:16px;font-weight:650;letter-spacing:-.025em}
-.muted{color:var(--gray);font-size:13px;line-height:1.7}
-.hero{padding:clamp(82px,12vw,145px) 20px 105px;text-align:center}
-.eyebrow{color:#6e6e73;font-size:11px;font-weight:650;letter-spacing:3.2px;margin-bottom:22px}
+
+h2{
+  font-size:clamp(25px,3vw,34px);
+  font-weight:720;
+  line-height:1.3;
+  margin-bottom:12px;
+}
+
+h3{
+  font-size:16px;
+  font-weight:650;
+}
+
+.muted{
+  color:var(--gray);
+  font-size:13px;
+  line-height:1.8;
+}
+
+.hero{
+  padding:clamp(82px,12vw,145px) 20px 105px;
+  text-align:center;
+}
+
+.eyebrow{
+  color:#6e6e73;
+  font-size:11px;
+  font-weight:650;
+  letter-spacing:3.2px;
+  margin-bottom:22px;
+}
+
 .hero h1{
-  font-size:clamp(52px,9vw,104px);line-height:.99;
-  letter-spacing:-.075em;font-weight:750;color:#1d1d1f;margin-bottom:28px
+  font-size:clamp(52px,9vw,104px);
+  line-height:1.15;
+  font-weight:750;
+  color:#1d1d1f;
+  margin-bottom:28px;
 }
-.hero p{color:#6e6e73;font-size:clamp(17px,2.1vw,23px);line-height:1.5;max-width:650px;margin:auto}
-.hero-note{color:#86868b;margin-top:28px;font-size:12px;letter-spacing:.02em}
-.toolbar{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+
+.hero p{
+  color:#6e6e73;
+  font-size:clamp(17px,2.1vw,23px);
+  line-height:1.8;
+  max-width:650px;
+  margin:auto;
+}
+
+.hero-note{
+  color:#86868b;
+  margin-top:28px;
+  font-size:12px;
+}
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+  flex-wrap:wrap;
+}
+
 input,select{
-  border:1px solid rgba(0,0,0,.12);border-radius:30px;
-  padding:12px 17px;background:rgba(255,255,255,.92);outline:none;font-size:14px
+  border:1px solid rgba(0,0,0,.09);
+  border-radius:30px;
+  padding:12px 17px;
+  background:rgba(255,255,255,.76);
+  backdrop-filter:blur(12px);
+  outline:none;
+  font-size:14px;
+  color:var(--black);
+  transition:.2s;
 }
-input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,102,204,.1)}
+
+input:focus,select:focus{
+  border-color:var(--blue);
+  background:white;
+  box-shadow:0 0 0 4px rgba(0,102,204,.09);
+}
+
 #search{flex:1;min-width:220px}
+
 .btn{
-  border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:30px;
-  padding:10px 17px;cursor:pointer;font-size:13px;font-weight:550;transition:.2s
+  border:1px solid rgba(0,0,0,.09);
+  background:rgba(255,255,255,.75);
+  border-radius:30px;
+  padding:10px 17px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:550;
+  transition:.22s;
+  color:var(--black);
 }
-.btn:hover{background:#f5f5f7}
-#status{color:var(--gray);font-size:12px;padding:5px 3px 15px}
-.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:25px}
+
+.btn:hover{
+  background:white;
+  transform:translateY(-1px);
+  box-shadow:0 5px 16px rgba(0,0,0,.055);
+}
+
+.btn.selected{
+  background:#0071e3;
+  color:white;
+  border-color:#0071e3;
+}
+
+#status{
+  color:var(--gray);
+  font-size:12px;
+  padding:5px 3px 15px;
+}
+
+.lang-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-top:25px;
+}
+
 .lang-col{
-  border:1px solid rgba(0,0,0,.06);border-radius:22px;
-  padding:20px;background:#fbfbfd;min-width:0;
-  transition:transform .25s ease,box-shadow .25s ease
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:22px;
+  padding:20px;
+  background:rgba(255,255,255,.48);
+  backdrop-filter:blur(16px);
+  min-width:0;
+  transition:.25s;
 }
-.lang-col:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.055)}
-.lang-col h3{display:flex;justify-content:space-between;align-items:center}
-.lang-col .code{font-size:27px;font-weight:750;letter-spacing:-.06em}
+
+.lang-col:hover{
+  transform:translateY(-3px);
+  background:rgba(255,255,255,.8);
+  box-shadow:var(--shadow-hover);
+}
+
+.lang-col h3{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.lang-col .code{
+  font-size:27px;
+  font-weight:750;
+}
+
 .language-news-scroll{
-  max-height:430px;overflow-y:auto;overflow-x:hidden;padding-right:8px;
-  overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b8b8bd transparent
+  max-height:430px;
+  overflow:auto;
+  padding-right:8px;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
 }
-.language-news-scroll::-webkit-scrollbar,.country-column::-webkit-scrollbar{width:7px}
-.language-news-scroll::-webkit-scrollbar-thumb,.country-column::-webkit-scrollbar-thumb{
-  background:#b8b8bd;border-radius:20px
+
+.pill{
+  background:rgba(0,0,0,.055);
+  padding:5px 10px;
+  border-radius:30px;
+  font-size:11px;
+  color:#6e6e73;
 }
-.pill{background:#f0f0f2;padding:5px 10px;border-radius:30px;font-size:11px;color:#6e6e73}
-.news-item{padding:17px 0;border-top:1px solid rgba(0,0,0,.07)}
+
+.news-item{
+  padding:17px 0;
+  border-top:1px solid rgba(0,0,0,.065);
+}
+
 .news-item a{
-  color:var(--black);text-decoration:none;font-weight:620;
-  line-height:1.55;display:inline-block;font-size:14px
+  color:var(--black);
+  text-decoration:none;
+  font-weight:620;
+  line-height:1.8;
+  display:inline-block;
+  font-size:14px;
 }
+
 .news-item a:hover{color:var(--blue)}
-.meta{color:#86868b;font-size:11px;margin-top:7px;line-height:1.6;overflow-wrap:anywhere}
-.empty{padding:25px 10px;text-align:center;color:var(--gray);font-size:13px}
+
+.meta{
+  color:#86868b;
+  font-size:11px;
+  margin-top:7px;
+  line-height:1.8;
+  overflow-wrap:anywhere;
+}
+
+.empty{
+  padding:25px 10px;
+  text-align:center;
+  color:var(--gray);
+  font-size:13px;
+}
+
 .scrollable-news{
-  max-height:560px;overflow-y:auto;overflow-x:hidden;padding-right:10px;
-  overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b8b8bd transparent
+  max-height:560px;
+  overflow:auto;
+  padding-right:10px;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
 }
-.scrollable-news::-webkit-scrollbar{width:7px}
-.scrollable-news::-webkit-scrollbar-thumb{background:#b8b8bd;border-radius:20px}
-.scrollable-news::-webkit-scrollbar-track{background:transparent}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:13px;
+}
+
 .country{
-  border:1px solid rgba(0,0,0,.07);background:#fbfbfd;border-radius:20px;
-  padding:20px;text-align:left;cursor:pointer;transition:.2s;min-height:95px
+  border:1px solid rgba(255,255,255,.9);
+  background:rgba(255,255,255,.55);
+  border-radius:22px;
+  padding:20px;
+  text-align:left;
+  cursor:pointer;
+  transition:.23s;
+  min-height:95px;
+  color:var(--black);
 }
-.country:hover{transform:translateY(-3px);box-shadow:0 10px 25px rgba(0,0,0,.06)}
-.country.selected{border:1.5px solid #0071e3;background:#f0f7ff}
-.country strong{display:block;font-size:17px;margin-bottom:6px}
-.country span{color:var(--gray);font-size:12px}
-.country-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0}
-.country-actions .btn.selected{background:#0071e3;color:white;border-color:#0071e3}
-.country-actions .pill{margin-left:4px}
-.country-columns{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+.country:hover{
+  transform:translateY(-3px);
+  background:rgba(255,255,255,.9);
+  box-shadow:var(--shadow-hover);
+}
+
+.country.selected{
+  border:1.5px solid #0071e3;
+  background:rgba(230,242,255,.8);
+}
+
+.country strong{
+  display:block;
+  font-size:17px;
+  margin-bottom:6px;
+}
+
+.country span{
+  color:var(--gray);
+  font-size:12px;
+}
+
+.country-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:18px 0;
+}
+
+.country-columns{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
 .country-column{
-  background:#fbfbfd;border:1px solid rgba(0,0,0,.06);border-radius:20px;
-  padding:17px;min-width:0;max-height:430px;overflow-y:auto;overflow-x:hidden;
-  overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b8b8bd transparent
+  background:rgba(255,255,255,.52);
+  border:1px solid rgba(255,255,255,.85);
+  border-radius:20px;
+  padding:17px;
+  min-width:0;
+  max-height:430px;
+  overflow:auto;
 }
-.country-column::-webkit-scrollbar{width:7px}
-.country-column::-webkit-scrollbar-thumb{background:#b8b8bd;border-radius:20px}
+
 .country-column .news-item{padding:12px 0}
 .country-column .news-item a{font-size:13px}
+
 footer{
-  max-width:1180px;margin:auto;padding:12px 24px 35px;
-  text-align:center;color:#86868b;font-size:11px;line-height:1.7
+  max-width:1180px;
+  margin:auto;
+  padding:12px 24px 35px;
+  text-align:center;
+  color:#86868b;
+  font-size:11px;
+  line-height:1.8;
 }
-.compare-hero{padding:clamp(66px,9vw,112px) 18px 62px;text-align:center}
-.compare-eyebrow,.compare-kicker{color:#86868b;font-size:10px;font-weight:700;letter-spacing:3px}
+
+/* 同一事件比较 */
+.compare-hero{
+  padding:clamp(66px,9vw,112px) 18px 62px;
+  text-align:center;
+}
+
+.compare-eyebrow,.compare-kicker{
+  color:#86868b;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:3px;
+}
+
 .compare-hero h1{
-  margin:18px 0;color:#1d1d1f;font-size:clamp(42px,7vw,76px);
-  line-height:1.03;font-weight:750;letter-spacing:-.07em
+  margin:18px 0;
+  color:#1d1d1f;
+  font-size:clamp(42px,7vw,76px);
+  line-height:1.3;
+  font-weight:750;
+  letter-spacing:0;
 }
+
 .compare-hero h1 span{color:#86868b}
-.compare-hero p{max-width:620px;margin:0 auto;color:#6e6e73;font-size:clamp(16px,2vw,20px);line-height:1.55}
-.compare-panel{padding:clamp(22px,3.2vw,40px)}
-.compare-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;margin-bottom:22px}
-.compare-panel-heading h2{margin:9px 0 8px;font-size:clamp(25px,3vw,34px);letter-spacing:-.055em}
-.compare-panel-heading .muted{max-width:720px;line-height:1.65}
-.compare-count-note{padding:8px 13px;border-radius:999px;background:#f5f5f7;color:#6e6e73;font-size:11px;white-space:nowrap}
-.compare-candidate-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.compare-candidate-list .news-item{
-  display:flex;flex-direction:column;justify-content:space-between;min-height:138px;
-  margin:0;padding:21px;border:1px solid rgba(0,0,0,.07);
-  border-radius:20px;background:#fbfbfd;transition:.22s
+
+.compare-hero p{
+  max-width:680px;
+  margin:0 auto;
+  color:#6e6e73;
+  font-size:clamp(16px,2vw,20px);
+  line-height:1.8;
 }
-.compare-candidate-list .news-item:hover{transform:translateY(-3px);background:#fff;box-shadow:0 12px 28px rgba(0,0,0,.055)}
-.compare-candidate-list .news-item strong{display:block;color:#1d1d1f;font-size:15px;line-height:1.55;font-weight:650}
-.compare-candidate-list .news-item .meta{margin-top:18px;color:#86868b;font-size:11px;line-height:1.5}
-.compare-candidate-list .empty{grid-column:1/-1;padding:50px 20px;border-radius:20px;background:#fbfbfd}
-.compare-controls{display:grid;grid-template-columns:minmax(220px,1.6fr) repeat(2,minmax(150px,.8fr));gap:10px;margin:22px 0 12px}
-.compare-controls input,.compare-controls select{width:100%;min-width:0;border:1px solid #d2d2d7;border-radius:12px;background:#fff;color:#1d1d1f;padding:13px 14px;outline:none}
-.compare-result-line{color:#86868b;font-size:12px;margin:10px 0 16px}
+
+.compare-hero .compare-motto{
+  margin-top:20px;
+  font-size:15px;
+  color:#86868b;
+}
+
+.compare-panel{padding:clamp(22px,3.2vw,40px)}
+
+.compare-panel-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:22px;
+  margin-bottom:22px;
+}
+
+.compare-panel-heading h2{
+  margin:9px 0 8px;
+  font-size:clamp(25px,3vw,34px);
+}
+
+.compare-count-note{
+  padding:8px 13px;
+  border-radius:999px;
+  background:rgba(0,0,0,.045);
+  color:#6e6e73;
+  font-size:11px;
+  white-space:nowrap;
+}
+
+.compare-candidate-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.compare-candidate-list .news-item{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:138px;
+  margin:0;
+  padding:21px;
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:20px;
+  background:rgba(255,255,255,.55);
+  transition:.22s;
+}
+
+.compare-candidate-list .news-item:hover{
+  transform:translateY(-3px);
+  background:rgba(255,255,255,.9);
+  box-shadow:var(--shadow-hover);
+}
+
+.compare-candidate-list .news-item strong{
+  display:block;
+  color:#1d1d1f;
+  font-size:15px;
+  line-height:1.8;
+}
+
+.compare-candidate-list .news-item .meta{margin-top:18px}
+
+.compare-candidate-list .empty{
+  grid-column:1/-1;
+  padding:50px 20px;
+  border-radius:20px;
+  background:rgba(255,255,255,.5);
+}
+
+.compare-controls{
+  display:grid;
+  grid-template-columns:minmax(220px,1.6fr) repeat(2,minmax(150px,.8fr));
+  gap:10px;
+  margin:22px 0 12px;
+}
+
+.compare-controls input,.compare-controls select{
+  width:100%;
+  min-width:0;
+  border-radius:14px;
+  padding:13px 14px;
+}
+
+.compare-result-line{
+  color:#86868b;
+  font-size:12px;
+  margin:10px 0 16px;
+}
+
 .compare-story{gap:10px}
 .compare-story a{color:inherit;text-decoration:none}
-.compare-story-tags{display:flex;flex-wrap:wrap;gap:6px}
-.compare-story-tags span{background:#f0f0f2;color:#6e6e73;border-radius:99px;padding:5px 9px;font-size:10px}
-.compare-timeline{display:flex;flex-direction:column;gap:0}
-.timeline-item{display:grid;grid-template-columns:175px 1fr;gap:18px;padding:17px 0;border-bottom:1px solid #eeeef0}
-.timeline-date{color:#86868b;font-size:12px}
-.timeline-content strong{font-size:14px;line-height:1.5}
-.timeline-content .meta{margin-top:6px;color:#86868b;font-size:11px}
+
+.compare-story-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.compare-story-tags span{
+  background:rgba(0,0,0,.05);
+  color:#6e6e73;
+  border-radius:99px;
+  padding:5px 9px;
+  font-size:10px;
+}
+
+.compare-timeline{display:flex;flex-direction:column}
+
+.timeline-item{
+  display:grid;
+  grid-template-columns:175px 1fr;
+  gap:18px;
+  padding:17px 0;
+  border-bottom:1px solid rgba(0,0,0,.065);
+}
+
+.timeline-date{
+  color:#86868b;
+  font-size:12px;
+}
+
+.timeline-content strong{
+  font-size:14px;
+  line-height:1.8;
+}
+
+/* 选举中心 */
+.election-hero{
+  text-align:center;
+  padding:75px 15px 48px;
+}
+
+.election-hero .eyebrow{margin-bottom:16px}
+
+.election-hero h1{
+  font-size:clamp(45px,8vw,82px);
+  margin:0 0 18px;
+}
+
+.election-hero p{
+  color:var(--gray);
+  font-size:16px;
+  line-height:1.8;
+}
+
+.election-switch{
+  display:flex;
+  justify-content:center;
+  gap:5px;
+  padding:5px;
+  background:rgba(0,0,0,.055);
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:999px;
+  width:max-content;
+  max-width:100%;
+  margin:25px auto;
+  backdrop-filter:blur(16px);
+}
+
+.election-switch button{
+  border:0;
+  background:transparent;
+  color:#55555a;
+  padding:11px 28px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:600;
+  transition:.2s;
+}
+
+.election-switch button.active{
+  color:#1d1d1f;
+  background:rgba(255,255,255,.95);
+  box-shadow:0 2px 9px rgba(0,0,0,.09);
+}
+
+.election-region-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:15px;
+  margin:22px 0;
+}
+
+.election-region{
+  border:1px solid rgba(255,255,255,.9);
+  background:rgba(255,255,255,.57);
+  border-radius:25px;
+  padding:23px;
+  min-height:155px;
+  text-align:left;
+  cursor:pointer;
+  color:var(--black);
+  backdrop-filter:blur(20px);
+  transition:.25s;
+}
+
+.election-region:hover{
+  transform:translateY(-4px);
+  background:rgba(255,255,255,.9);
+  box-shadow:var(--shadow-hover);
+}
+
+.election-region.active{
+  border:1.5px solid rgba(0,113,227,.7);
+  background:rgba(235,245,255,.83);
+}
+
+.election-flag{
+  font-size:30px;
+  display:block;
+  margin-bottom:15px;
+}
+
+.election-region strong{
+  display:block;
+  font-size:18px;
+  margin-bottom:6px;
+}
+
+.election-region small{
+  color:var(--gray);
+  font-size:12px;
+}
+
+.election-section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.election-section-title h2{
+  margin:0;
+  font-size:25px;
+}
+
+.election-section-title span{
+  color:var(--gray);
+  font-size:11px;
+}
+
+.election-info-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+
+.election-info-card{
+  background:rgba(255,255,255,.52);
+  border:1px solid rgba(255,255,255,.88);
+  border-radius:21px;
+  padding:22px;
+  min-width:0;
+}
+
+.election-info-card h3{margin:0 0 9px}
+
+.election-info-card p{
+  color:var(--gray);
+  font-size:12px;
+  line-height:1.8;
+  margin:0;
+}
+
+.election-status{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  border-radius:30px;
+  padding:6px 11px;
+  background:rgba(0,0,0,.045);
+  color:#666;
+  font-size:11px;
+  margin-top:13px;
+}
+
+.election-status::before{
+  content:"";
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#9b9ba0;
+}
+
+.election-status.official::before{background:#20a464}
+.election-status.warning::before{background:#e39a35}
+
+.election-action{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border:0;
+  border-radius:999px;
+  padding:11px 17px;
+  background:#0071e3;
+  color:white;
+  text-decoration:none;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+  margin-top:16px;
+}
+
+.election-action:hover{
+  background:#0062c4;
+  transform:translateY(-1px);
+}
+
+.election-action.secondary{
+  background:rgba(0,0,0,.055);
+  color:#333;
+}
+
+.election-action.secondary:hover{background:rgba(0,0,0,.1)}
+
+.election-country-label{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:17px;
+}
+
+.election-country-label .flag{font-size:35px}
+
+.election-country-label h2{
+  margin:0;
+  font-size:28px;
+}
+
+.election-country-label p{
+  color:var(--gray);
+  margin:4px 0 0;
+  font-size:12px;
+}
+
+.election-news-report{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.election-stat{
+  background:rgba(255,255,255,.57);
+  border:1px solid rgba(255,255,255,.88);
+  border-radius:20px;
+  padding:20px;
+}
+
+.election-stat strong{
+  display:block;
+  font-size:30px;
+  margin-bottom:5px;
+}
+
+.election-stat span{
+  color:var(--gray);
+  font-size:11px;
+}
+
+.election-source-group{
+  border-top:1px solid rgba(0,0,0,.065);
+  padding:15px 0;
+}
+
+.election-source-group:first-child{border-top:0}
+
+.election-source-group strong{
+  display:block;
+  font-size:13px;
+  margin-bottom:9px;
+}
+
+.election-source-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+
+.election-source-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 11px;
+  background:rgba(0,0,0,.045);
+  border-radius:999px;
+  font-size:11px;
+  color:#555;
+}
+
+.election-source-tag em{
+  font-style:normal;
+  color:#8a8a90;
+}
+
+.election-report-list .news-item{padding:15px 0}
+.election-report-list .news-item a{font-size:13px}
+
+.election-note{
+  border-radius:18px;
+  background:rgba(0,0,0,.035);
+  padding:15px 17px;
+  color:#6e6e73;
+  font-size:12px;
+  line-height:1.8;
+  margin-top:15px;
+}
+
+.election-empty{
+  text-align:center;
+  color:var(--gray);
+  padding:35px 15px;
+  font-size:13px;
+}
+
+/* 马来西亚三种选举按钮 */
+.election-type-area{margin:20px 0 24px}
+.election-type-heading{font-size:13px;font-weight:650;margin-bottom:12px}
+
+.election-type-buttons{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+.election-type-button{
+  border:1px solid rgba(255,255,255,.9);
+  background:rgba(255,255,255,.68);
+  color:#333;
+  border-radius:17px;
+  padding:16px 10px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:650;
+  transition:.2s;
+}
+
+.election-type-button:hover{
+  transform:translateY(-2px);
+  background:white;
+  box-shadow:var(--shadow-hover);
+}
+
+.election-type-button.active{
+  background:#0071e3;
+  color:white;
+  border-color:#0071e3;
+}
+
+.election-type-button small{
+  display:block;
+  font-size:10px;
+  font-weight:450;
+  margin-top:5px;
+  opacity:.75;
+}
+
+/* 互动选举地图 */
+.election-map-panel{overflow:hidden}
+
+.election-map-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+.election-map-toolbar select{
+  min-width:190px;
+  border-radius:14px;
+  background:rgba(255,255,255,.9);
+}
+
+.election-map-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 280px;
+  gap:16px;
+  align-items:stretch;
+}
+
+.election-map{
+  width:100%;
+  height:520px;
+  min-height:360px;
+  border-radius:22px;
+  background:#e9edf2;
+  border:1px solid rgba(0,0,0,.06);
+  overflow:hidden;
+  z-index:1;
+}
+
+.election-map-info{
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:22px;
+  padding:20px;
+  min-width:0;
+}
+
+.election-map-info h3{
+  font-size:17px;
+  margin-bottom:12px;
+}
+
+.election-map-info .map-info-value{
+  font-size:13px;
+  line-height:1.8;
+  color:#555;
+  overflow-wrap:anywhere;
+}
+
+.map-info-row{
+  padding:11px 0;
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+
+.map-info-row:last-child{border-bottom:0}
+
+.map-info-label{
+  display:block;
+  color:#86868b;
+  font-size:10px;
+  margin-bottom:4px;
+}
+
+.map-info-value strong{color:#1d1d1f}
+
+.map-status{
+  padding:13px 15px;
+  border-radius:15px;
+  background:rgba(0,0,0,.045);
+  color:#6e6e73;
+  font-size:12px;
+  line-height:1.8;
+  margin-top:13px;
+}
+
+.map-status.error{
+  background:rgba(255,149,0,.09);
+  color:#8b5b18;
+}
+
+.map-status.success{
+  background:rgba(52,199,89,.09);
+  color:#267a42;
+}
+
+.map-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:15px;
+}
+
+.map-legend-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  color:#666;
+}
+
+.map-legend-dot{
+  width:10px;
+  height:10px;
+  border-radius:3px;
+  background:#aeb7c2;
+  border:1px solid rgba(0,0,0,.08);
+}
+
+.leaflet-popup-content-wrapper{
+  border-radius:14px;
+  box-shadow:0 8px 25px rgba(0,0,0,.12);
+}
+
+.leaflet-popup-content{
+  font-size:12px;
+  line-height:1.8;
+}
+
+.leaflet-control-zoom a{color:#1d1d1f!important}
+
+/* 国家元首页面 */
+.monarch-hero{
+  text-align:center;
+  padding:clamp(65px,10vw,115px) 18px 45px;
+}
+
+.monarch-hero .eyebrow{margin-bottom:18px}
+
+.monarch-hero h1{
+  font-size:clamp(42px,8vw,78px);
+  line-height:1.3;
+  margin:0 0 18px;
+}
+
+.monarch-hero p{
+  max-width:700px;
+  margin:auto;
+  color:var(--gray);
+  font-size:16px;
+  line-height:1.9;
+}
+
+/* 官方肖像：居中展示 */
+.monarch-portrait-section{
+  text-align:center;
+  padding:28px 20px 35px;
+}
+
+.monarch-portrait-frame{
+  width:min(100%,560px);
+  margin:0 auto;
+  padding:12px;
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.95);
+  border-radius:25px;
+  box-shadow:0 12px 38px rgba(0,0,0,.07);
+  overflow:hidden;
+}
+
+.monarch-portrait-frame {
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.monarch-portrait-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 360px;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.monarch-portrait-caption{
+  margin-top:17px;
+  color:var(--gray);
+  font-size:11px;
+  line-height:1.8;
+}
+
+.monarch-portrait-caption a{
+  color:var(--blue);
+  text-decoration:none;
+}
+
+.monarch-identity{
+  text-align:center;
+  padding:10px 10px 5px;
+}
+
+.monarch-number{
+  color:var(--blue);
+  font-size:12px;
+  letter-spacing:2px;
+  margin-bottom:12px;
+}
+
+.monarch-name{
+  font-size:clamp(30px,5vw,48px);
+  line-height:1.5;
+  margin-bottom:8px;
+}
+
+.monarch-role{
+  color:var(--gray);
+  font-size:14px;
+  line-height:1.9;
+}
+
+.monarch-intro{
+  max-width:760px;
+  margin:18px auto 0;
+  color:var(--gray);
+  font-size:14px;
+  line-height:2;
+  text-align:center;
+}
+
+.monarch-facts{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin-top:25px;
+}
+
+.monarch-fact{
+  background:rgba(255,255,255,.65);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:20px;
+  padding:20px;
+}
+
+.monarch-fact span{
+  display:block;
+  color:var(--gray);
+  font-size:11px;
+  margin-bottom:8px;
+}
+
+.monarch-fact strong{
+  display:block;
+  font-size:15px;
+  line-height:1.6;
+}
+
+.monarch-duty-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+
+.monarch-duty{
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:20px;
+  padding:22px;
+}
+
+.monarch-duty h3{margin:0 0 10px}
+
+.monarch-duty p{
+  color:var(--gray);
+  font-size:13px;
+  line-height:1.9;
+  margin:0;
+}
+
+.monarch-timeline{
+  border-left:2px solid rgba(0,113,227,.2);
+  margin:25px 0 10px 9px;
+  padding-left:25px;
+}
+
+.monarch-timeline-item{
+  position:relative;
+  padding:0 0 25px;
+}
+
+.monarch-timeline-item::before{
+  content:"";
+  position:absolute;
+  left:-32px;
+  top:5px;
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:#0071e3;
+  border:3px solid #eaf3ff;
+}
+
+.monarch-timeline-item strong{
+  display:block;
+  font-size:15px;
+  margin-bottom:6px;
+}
+
+.monarch-timeline-item p{
+  color:var(--gray);
+  font-size:12px;
+  line-height:1.8;
+  margin:0;
+}
+
+.monarch-links{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.monarch-link{
+  display:inline-flex;
+  align-items:center;
+  padding:12px 18px;
+  background:rgba(255,255,255,.8);
+  border:1px solid rgba(0,0,0,.07);
+  border-radius:999px;
+  color:var(--black);
+  text-decoration:none;
+  font-size:13px;
+  transition:.2s;
+}
+
+.monarch-link:hover{
+  background:white;
+  color:var(--blue);
+  transform:translateY(-2px);
+}
+
+/* 导览页面 */
+.guide-hero{
+  text-align:center;
+  padding:65px 15px 45px;
+}
+
+.guide-hero h1{
+  font-size:clamp(42px,8vw,76px);
+  margin-bottom:15px;
+}
+
+.guide-hero p{
+  color:var(--gray);
+  font-size:15px;
+  line-height:1.9;
+}
+
+.guide-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:13px;
+}
+
+.guide-card{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  text-align:left;
+  min-height:190px;
+  padding:23px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.9);
+  background:rgba(255,255,255,.58);
+  cursor:pointer;
+  color:var(--black);
+  transition:.22s;
+}
+
+.guide-card:hover{
+  transform:translateY(-4px);
+  background:rgba(255,255,255,.92);
+  box-shadow:var(--shadow-hover);
+}
+
+.guide-card .guide-icon{
+  font-size:27px;
+  margin-bottom:17px;
+}
+
+.guide-card strong{
+  font-size:17px;
+  margin-bottom:9px;
+}
+
+.guide-card p{
+  color:var(--gray);
+  font-size:12px;
+  line-height:1.8;
+  margin:0;
+}
+
+.guide-card .guide-more{
+  margin-top:auto;
+  padding-top:17px;
+  color:var(--blue);
+  font-size:12px;
+}
+
+/* 响应式 */
 @media(max-width:900px){
   .lang-grid,.cards{grid-template-columns:repeat(2,1fr)}
   .country-columns{grid-template-columns:repeat(2,1fr)}
+  .election-region-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .election-map-layout{grid-template-columns:1fr}
+  .election-map-info{min-height:180px}
+  .monarch-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
 @media(max-width:680px){
   .compare-hero{padding:58px 8px 42px}
   .compare-hero h1{font-size:clamp(39px,11vw,56px)}
   .compare-panel-heading{flex-direction:column}
   .compare-candidate-list{grid-template-columns:1fr}
-  .compare-candidate-list .news-item{min-height:116px}
   .compare-controls{grid-template-columns:1fr}
   .timeline-item{grid-template-columns:1fr;gap:5px}
+  .election-news-report{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .monarch-duty-grid{grid-template-columns:1fr}
 }
+
 @media(max-width:600px){
   header{padding:0 14px}
   .tagline{display:none}
   main{padding:16px 13px 40px}
   .hero{padding:68px 8px 58px}
-  .hero h1{font-size:clamp(44px,13vw,60px);letter-spacing:-.065em}
+  .hero h1{font-size:clamp(44px,13vw,60px)}
   .panel{border-radius:22px;margin:14px 0;padding:22px 17px}
   .brand{font-size:16px}
   .lang-grid{grid-template-columns:repeat(2,1fr);gap:9px}
   .cards{grid-template-columns:repeat(2,1fr)}
   .country-columns{grid-template-columns:1fr}
   #search{width:100%}
+  .election-hero{padding:55px 8px 30px}
+  .election-region-grid{grid-template-columns:1fr}
+  .election-region{min-height:125px;padding:19px}
+  .election-info-grid{grid-template-columns:1fr}
+  .election-news-report{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .election-switch button{padding:10px 22px}
+  .election-map{height:420px;min-height:320px}
+  .election-map-toolbar{align-items:stretch}
+  .election-map-toolbar select{width:100%}
+  .election-type-buttons{gap:7px}
+  .election-type-button{padding:14px 5px;font-size:12px}
+  .monarch-facts{grid-template-columns:1fr 1fr}
+  .monarch-portrait-section{padding:18px 5px 25px}
+  .monarch-portrait-frame{padding:7px}
+  .monarch-portrait-frame iframe{height:430px}
+  .guide-grid{grid-template-columns:1fr}
 }
 </style>
-</head>
-<body>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+
+<body>
 <header>
   <div class="brand-row">
     <div class="brand">新闻比比看！</div>
     <div class="tagline">天下为公 · 同一事件，不同媒体</div>
   </div>
+
   <nav id="nav">
     <button data-page="home" class="active">首页</button>
     <button data-page="all">总览新闻</button>
@@ -203,6 +1395,9 @@ footer{
     <button data-page="international">国际新闻</button>
     <button data-page="compare">同一事件比较</button>
     <button data-page="sources">媒体目录</button>
+    <button data-page="election">选举</button>
+    <button data-page="monarch">国家元首</button>
+    <button data-page="guide">导览</button>
   </nav>
 </header>
 
@@ -217,6 +1412,7 @@ footer{
 </div>
 <div id="status">正在读取新闻数据……</div>
 
+<!-- 首页 -->
 <section id="page-home">
   <div class="hero">
     <div class="eyebrow">NEWS · PERSPECTIVES · UNDERSTANDING</div>
@@ -224,36 +1420,41 @@ footer{
     <p>跨越语言与地域，比较不同媒体如何报道世界。</p>
     <div class="hero-note">天下为公 · 让信息更透明，让观点可比较</div>
   </div>
+
   <div class="panel">
     <h2>🇲🇾 马来西亚四语新闻</h2>
     <p class="muted">四种语言并列，浏览不同媒体的报道。</p>
     <div class="lang-grid" id="home-languages"></div>
   </div>
- 
+
   <div class="panel">
     <h2>今日重点事件</h2>
     <p class="muted">标题相近的新闻候选，不代表已经确认是同一事件。</p>
     <div id="home-events"></div>
   </div>
+
   <div class="panel">
     <h2>最新新闻总览</h2>
     <div id="home-latest" class="scrollable-news"></div>
   </div>
 </section>
 
+<!-- 总览新闻 -->
 <section id="page-all" class="hidden">
   <div class="panel">
     <h2>🇲🇾 马来西亚国内新闻</h2>
     <p class="muted">只显示来自马来西亚媒体的新闻。</p>
     <div id="all-domestic-list" class="scrollable-news"></div>
   </div>
+
   <div class="panel">
     <h2>🌍 国际新闻</h2>
-    <p class="muted">显示来自日本、韩国、中国、台湾、新加坡、美国、英国及欧盟等地区的新闻。</p>
+    <p class="muted">显示来自其他国家及地区的新闻。</p>
     <div id="all-international-list" class="scrollable-news"></div>
   </div>
 </section>
 
+<!-- 国内新闻 -->
 <section id="page-domestic" class="hidden">
   <div class="panel">
     <h2>🇲🇾 马来西亚国内新闻</h2>
@@ -267,6 +1468,7 @@ footer{
   </div>
 </section>
 
+<!-- 国际新闻 -->
 <section id="page-international" class="hidden">
   <div class="panel">
     <h2>🌍 国际新闻</h2>
@@ -277,23 +1479,28 @@ footer{
       <span class="muted" id="selected-count">已选择 0 / 4</span>
     </div>
   </div>
+
   <div class="panel">
     <h2>🌐 多国并列看板</h2>
     <p class="muted">最多选择四个国家或地区，同时浏览新闻。</p>
     <div id="country-columns" class="country-columns"></div>
   </div>
+
   <div class="panel">
     <h2>国际新闻总览</h2>
     <div id="international-list" class="scrollable-news"></div>
   </div>
 </section>
 
+<!-- 同一事件比较 -->
 <section id="page-compare" class="hidden">
   <div class="compare-hero">
     <div class="compare-eyebrow">NEWS COMPARISON</div>
-    <h1>同一事件，<span>不同视角。</span></h1>
-    <p>把不同媒体的报道放在一起，观察标题、来源与报道时间。</p>
+    <h1>同一件事，<span>不同的视角。</span></h1>
+    <p>跨越语言与地域，比较不同媒体如何报道世界。</p>
+    <div class="compare-motto">天下为公 · 让信息更透明，让观点可比较</div>
   </div>
+
   <div class="panel compare-panel">
     <div class="compare-panel-heading">
       <div>
@@ -303,26 +1510,38 @@ footer{
       </div>
       <div class="compare-count-note">最多显示 50 篇</div>
     </div>
+
     <div class="compare-controls">
       <input id="compare-query" type="search" placeholder="搜索事件，例如：选举、地震、AI 政策……">
+
       <select id="compare-country">
         <option value="all">所有国家／地区</option>
         <option value="malaysia">马来西亚</option>
-        <option value="japan">日本</option><option value="korea">韩国</option>
-        <option value="china">中国</option><option value="taiwan">台湾</option>
-        <option value="singapore">新加坡</option><option value="usa">美国</option>
-        <option value="uk">英国</option><option value="eu">欧盟</option>
+        <option value="japan">日本</option>
+        <option value="korea">韩国</option>
+        <option value="china">中国</option>
+        <option value="taiwan">台湾</option>
+        <option value="singapore">新加坡</option>
+        <option value="usa">美国</option>
+        <option value="uk">英国</option>
+        <option value="eu">欧盟</option>
       </select>
+
       <select id="compare-language">
         <option value="all">所有语言</option>
-        <option value="en">英语</option><option value="bm">马来语</option>
-        <option value="zh">中文</option><option value="ta">Tamil</option>
-        <option value="ja">日语</option><option value="ko">韩语</option>
+        <option value="en">英语</option>
+        <option value="bm">马来语</option>
+        <option value="zh">中文</option>
+        <option value="ta">Tamil</option>
+        <option value="ja">日语</option>
+        <option value="ko">韩语</option>
       </select>
     </div>
+
     <div class="compare-result-line" id="compare-result-count"></div>
     <div id="compare-candidates" class="compare-candidate-list"></div>
   </div>
+
   <div class="panel compare-panel">
     <div class="compare-panel-heading">
       <div>
@@ -335,6 +1554,7 @@ footer{
   </div>
 </section>
 
+<!-- 媒体目录 -->
 <section id="page-sources" class="hidden">
   <div class="panel">
     <h2>媒体目录</h2>
@@ -342,22 +1562,382 @@ footer{
     <div id="source-list" class="scrollable-news"></div>
   </div>
 </section>
+
+<!-- 选举 -->
+<section id="page-election" class="hidden">
+  <div class="election-hero">
+    <div class="eyebrow">ELECTIONS · RESULTS · MEDIA TRACKING</div>
+    <h1>选举</h1>
+    <p>追踪选举进度、投票结果，以及不同媒体如何报道选举。</p>
+  </div>
+
+  <div class="panel">
+    <div class="election-switch">
+      <button id="election-domestic-tab" class="active">国内</button>
+      <button id="election-international-tab">国外</button>
+    </div>
+
+    <div id="election-domestic-area">
+      <div class="election-region-grid">
+        <button class="election-region active" data-election-country="my">
+          <span class="election-flag">🇲🇾</span>
+          <strong>马来西亚</strong>
+          <small>全国大选 · 州选举 · 补选</small>
+        </button>
+      </div>
+    </div>
+
+    <div id="election-international-area" class="hidden">
+      <div class="election-region-grid">
+        <button class="election-region" data-election-country="sg">
+          <span class="election-flag">🇸🇬</span>
+          <strong>新加坡</strong>
+          <small>国会选举 · 补选</small>
+        </button>
+
+        <button class="election-region" data-election-country="tw">
+          <span class="election-flag">🇹🇼</span>
+          <strong>台湾</strong>
+          <small>总统 · 立委 · 地方选举</small>
+        </button>
+
+        <button class="election-region" data-election-country="us">
+          <span class="election-flag">🇺🇸</span>
+          <strong>美国</strong>
+          <small>总统 · 国会 · 州选举</small>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="election-detail">
+    <div class="panel">
+      <div class="election-empty">请选择地区，查看选举资料。</div>
+    </div>
+  </div>
+</section>
+
+<!-- 国家元首：只介绍马来西亚 -->
+<section id="page-monarch" class="hidden">
+
+  <div class="monarch-hero">
+    <div class="eyebrow">MALAYSIA · CONSTITUTIONAL MONARCHY</div>
+    <h1>马来西亚国家元首</h1>
+    <p>认识马来西亚最高元首制度、现任最高元首的任期，以及国家元首在联邦宪法下的职责。</p>
+  </div>
+
+ <!-- 官方肖像：置中 -->
+<div class="panel monarch-portrait-section">
+  <div class="monarch-portrait-frame">
+    <img
+      src="https://www.istananegara.gov.my/v1/images/2025/09/30/potret-rasmi-ydpa.jpg"
+      alt="马来西亚第十七任最高元首苏丹依布拉欣官方肖像"
+      loading="lazy">
+  </div>
+
+</div>
+    <div class="monarch-portrait-caption">
+      官方资料来源：马来西亚国家皇宫 Istana Negara · Royal Press Office
+      <br>
+      <a href="https://www.istananegara.gov.my/v1/images/2024/PROFIL%20KDYMM%20SPB%20YDPA%20XVII.pdf"
+         target="_blank"
+         rel="noopener noreferrer">
+        打开国家皇宫官方人物资料 PDF ↗
+      </a>
+    </div>
+
+    <div class="monarch-identity">
+      <div class="monarch-number">第十七任最高元首 · 17TH YANG DI-PERTUAN AGONG</div>
+
+      <h2 class="monarch-name">苏丹依布拉欣</h2>
+
+      <p class="monarch-role">
+        Sultan Ibrahim ibni Almarhum Sultan Iskandar
+        <br>
+        马来西亚第十七任最高元首
+      </p>
+
+      <p class="monarch-intro">
+        苏丹依布拉欣于 2024 年 1 月 31 日正式就任马来西亚最高元首。
+        最高元首是马来西亚联邦国家元首，依据联邦宪法履行职责。
+      </p>
+    </div>
+  </div>
+
+  <!-- 任期资料 -->
+  <div class="panel">
+    <h2>现任最高元首任期</h2>
+    <p class="muted">第十七任最高元首苏丹依布拉欣的任期资料。</p>
+
+    <div class="monarch-facts">
+      <div class="monarch-fact">
+        <span>最高元首任期开始</span>
+        <strong>2024 年 1 月 31 日</strong>
+      </div>
+
+      <div class="monarch-fact">
+        <span>五年任期届满日期</span>
+        <strong>2029 年 1 月 30 日</strong>
+      </div>
+
+      <div class="monarch-fact">
+        <span>职位</span>
+        <strong>马来西亚国家元首</strong>
+      </div>
+
+      <div class="monarch-fact">
+        <span>马来文称号</span>
+        <strong>Yang di-Pertuan Agong</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- 国家元首制度 -->
+  <div class="panel">
+    <h2>国家元首是什么？</h2>
+
+    <p class="muted">
+      马来西亚实行君主立宪制。最高元首是联邦国家元首，依照联邦宪法履行职权。
+      国家元首并非由全民直接选举产生，而是由马来统治者会议依照宪法及轮任制度选出。
+    </p>
+  </div>
+
+  <!-- 宪法职责 -->
+  <div class="panel">
+    <h2>国家元首的宪法职责</h2>
+
+    <p class="muted">
+      最高元首的职权受到联邦宪法规定，并须按照宪法所设定的程序行使。
+    </p>
+
+    <div class="monarch-duty-grid">
+      <div class="monarch-duty">
+        <h3>国家元首</h3>
+        <p>代表马来西亚联邦国家，履行宪法规定的国家元首职能。</p>
+      </div>
+
+      <div class="monarch-duty">
+        <h3>任命首相</h3>
+        <p>根据联邦宪法，在国会下议院议员中，任命其判断最可能获得下议院多数议员信任的人士为首相。</p>
+      </div>
+
+      <div class="monarch-duty">
+        <h3>武装部队最高统帅</h3>
+        <p>依据联邦宪法，最高元首是马来西亚武装部队的最高统帅。</p>
+      </div>
+
+      <div class="monarch-duty">
+        <h3>国会相关职权</h3>
+        <p>依据宪法参与国会程序，包括召集、休会及解散国会等宪法职权。</p>
+      </div>
+
+      <div class="monarch-duty">
+        <h3>法律与法案</h3>
+        <p>依照宪法规定，对国会通过的法案行使相关职权。</p>
+      </div>
+
+      <div class="monarch-duty">
+        <h3>其他宪法职权</h3>
+        <p>包括宪法规定的任命、赦免及其他职权，具体程序依照相关宪法条文执行。</p>
+      </div>
+    </div>
+
+    <div class="election-note">
+      说明：马来西亚最高元首在君主立宪制度下履行职权。许多职权须依照宪法规定，根据内阁建议或其他宪法程序行使，并非个人不受限制地作出决定。
+    </div>
+  </div>
+
+  <!-- 最高元首制度 -->
+  <div class="panel">
+    <h2>马来西亚最高元首制度</h2>
+
+    <div class="monarch-timeline">
+      <div class="monarch-timeline-item">
+        <strong>九个有世袭统治者的州属</strong>
+        <p>马来西亚九个有世袭统治者的州属统治者，参与最高元首的选举制度。</p>
+      </div>
+
+      <div class="monarch-timeline-item">
+        <strong>马来统治者会议</strong>
+        <p>由马来统治者会议依照联邦宪法规定，选出最高元首及副最高元首。</p>
+      </div>
+
+      <div class="monarch-timeline-item">
+        <strong>五年任期</strong>
+        <p>最高元首通常任期五年，按照宪法及统治者会议的相关程序履行职责。</p>
+      </div>
+
+      <div class="monarch-timeline-item">
+        <strong>轮任制度</strong>
+        <p>马来西亚采用独特的轮任君主制度，最高元首由九个州属的统治者按照既定制度轮流担任。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 官方资料 -->
+  <div class="panel">
+    <h2>官方资料</h2>
+
+    <p class="muted">
+      有关最高元首、联邦宪法及国家制度，请以马来西亚官方资料为准。
+    </p>
+
+    <div class="monarch-links">
+      <a class="monarch-link"
+         href="https://www.istananegara.gov.my/"
+         target="_blank"
+         rel="noopener noreferrer">
+        国家皇宫 Istana Negara ↗
+      </a>
+
+      <a class="monarch-link"
+         href="https://www.parlimen.gov.my/"
+         target="_blank"
+         rel="noopener noreferrer">
+        马来西亚国会 ↗
+      </a>
+
+      <a class="monarch-link"
+         href="https://www.istananegara.gov.my/v1/images/2024/PROFIL%20KDYMM%20SPB%20YDPA%20XVII.pdf"
+         target="_blank"
+         rel="noopener noreferrer">
+        最高元首官方人物资料 ↗
+      </a>
+    </div>
+
+    <div class="election-note">
+      本栏目目前介绍现任最高元首及马来西亚君主立宪制度。历任最高元首名单及历史资料可在后续版本加入，并以官方历史记录核对。
+    </div>
+  </div>
+</section>
+
+<!-- 导览 -->
+<section id="page-guide" class="hidden">
+  <div class="guide-hero">
+    <div class="eyebrow">ABOUT · NAVIGATION · GUIDE</div>
+    <h1>网站导览</h1>
+    <p>了解「新闻比比看！」各个栏目，以及如何使用不同功能。</p>
+  </div>
+
+  <div class="panel">
+    <h2>新闻浏览</h2>
+    <p class="muted">从不同国家、语言和媒体角度了解新闻。</p>
+
+    <div class="guide-grid">
+      <button class="guide-card" data-guide-page="home">
+        <span class="guide-icon">⌂</span>
+        <strong>首页</strong>
+        <p>查看马来西亚四语新闻、今日重点事件候选及最新新闻总览。</p>
+        <span class="guide-more">进入首页 →</span>
+      </button>
+
+      <button class="guide-card" data-guide-page="all">
+        <span class="guide-icon">▤</span>
+        <strong>总览新闻</strong>
+        <p>将新闻分为马来西亚国内新闻和国际新闻，快速浏览全部内容。</p>
+        <span class="guide-more">查看总览 →</span>
+      </button>
+
+      <button class="guide-card" data-guide-page="domestic">
+        <span class="guide-icon">🇲🇾</span>
+        <strong>国内新闻</strong>
+        <p>浏览马来西亚不同语言媒体，并按政治、经济、社会、体育、娱乐等主题分类。</p>
+        <span class="guide-more">查看国内新闻 →</span>
+      </button>
+
+      <button class="guide-card" data-guide-page="international">
+        <span class="guide-icon">🌍</span>
+        <strong>国际新闻</strong>
+        <p>选择不同国家或地区，最多四个国家并列浏览新闻。</p>
+        <span class="guide-more">查看国际新闻 →</span>
+      </button>
+
+      <button class="guide-card" data-guide-page="compare">
+        <span class="guide-icon">⇄</span>
+        <strong>同一事件比较</strong>
+        <p>按关键词、国家和语言筛选报道，观察不同媒体对事件的报道及发布时间。</p>
+        <span class="guide-more">开始比较 →</span>
+      </button>
+
+      <button class="guide-card" data-guide-page="sources">
+        <span class="guide-icon">▧</span>
+        <strong>媒体目录</strong>
+        <p>查看目前新闻数据中出现的媒体名称，以及每个媒体收集到的新闻数量。</p>
+        <span class="guide-more">查看媒体目录 →</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>选举与国家制度</h2>
+    <p class="muted">了解选举资料、官方成绩及马来西亚国家制度。</p>
+
+    <div class="guide-grid">
+      <button class="guide-card" data-guide-page="election">
+        <span class="guide-icon">🗳️</span>
+        <strong>选举</strong>
+        <p>追踪马来西亚全国大选、州选举和补选，也可浏览新加坡、台湾及美国选举资料。</p>
+        <span class="guide-more">进入选举中心 →</span>
+      </button>
+
+      <button class="guide-card" data-guide-page="monarch">
+        <span class="guide-icon">🏛️</span>
+        <strong>国家元首</strong>
+        <p>认识马来西亚现任最高元首、五年任期、君主立宪制度及宪法职责。</p>
+        <span class="guide-more">认识国家元首 →</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>使用说明</h2>
+
+    <div class="monarch-duty-grid">
+      <div class="monarch-duty">
+        <h3>新闻搜索</h3>
+        <p>使用页面上方的搜索框，搜索新闻标题、媒体名称或关键词。</p>
+      </div>
+
+      <div class="monarch-duty">
+        <h3>新闻排序</h3>
+        <p>使用排序选项，按照最新或最早发布时间排列新闻。</p>
+      </div>
+
+      <div class="monarch-duty">
+        <h3>重新载入</h3>
+        <p>点击重新载入新闻，重新读取 news.json 中的数据。</p>
+      </div>
+
+      <div class="monarch-duty">
+        <h3>原始媒体报道</h3>
+        <p>点击新闻标题即可前往原始媒体网站阅读完整报道。</p>
+      </div>
+    </div>
+
+    <div class="election-note">
+      新闻比比看！是新闻浏览与媒体比较工具。新闻内容以原始媒体报道为准；选举成绩及国家制度资料应以相关官方机构公布的信息为准。
+    </div>
+  </div>
+</section>
+
 </main>
 
 <footer>
   新闻比比看！· 天下为公<br>
-  请以原始媒体报道为准。
+  请以原始媒体报道为准。选举结果以各地官方选举机构公布为准。
 </footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-const LANGS = [
+const LANGS=[
   {id:"en",code:"EN",name:"English",label:"英文新闻"},
   {id:"bm",code:"BM",name:"Bahasa Melayu",label:"马来文新闻"},
   {id:"zh",code:"中文",name:"中文",label:"华文新闻"},
   {id:"ta",code:"தமிழ்",name:"Tamil",label:"Tamil 新闻"}
 ];
 
-const COUNTRIES = [
+const COUNTRIES=[
   {id:"japan",name:"日本",en:"Japan",flag:"🇯🇵"},
   {id:"korea",name:"韩国",en:"South Korea",flag:"🇰🇷"},
   {id:"china",name:"中国",en:"China",flag:"🇨🇳"},
@@ -368,212 +1948,229 @@ const COUNTRIES = [
   {id:"eu",name:"欧盟",en:"European Union",flag:"🇪🇺"}
 ];
 
-let items = [];
-let selectedCountries = [];
-let activeDomesticLang = "en";
-let activeDomesticCategory = "all";
+let items=[];
+let selectedCountries=[];
+let activeDomesticLang="en";
+let activeDomesticCategory="all";
+let electionMode="domestic";
+let electionCountry="my";
+let electionType="pru";
+let electionMap=null;
+let electionMapLayer=null;
+let electionMapCountry="";
+let electionMapLayerType="parliament";
+let electionMapRequest=0;
 
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
 
-function esc(s="") {
+function esc(s=""){
   return String(s).replace(/[&<>"']/g,c=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;",
-    '"':"&quot;","'":"&#39;"
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   }[c]));
 }
 
-function dateValue(x) {
-  let d = new Date(x || 0);
-  return isNaN(d) ? 0 : d.getTime();
+function safeLink(value){
+  try{
+    const u=new URL(value,location.href);
+    return ["http:","https:"].includes(u.protocol)?u.href:"#";
+  }catch{
+    return "#";
+  }
 }
 
-function fmt(x) {
-  let d = new Date(x);
-  return isNaN(d) ? "时间未知" :
-    d.toLocaleString("zh-CN",{hour12:false});
+function dateValue(x){
+  const d=new Date(x||0);
+  return isNaN(d)?0:d.getTime();
 }
 
-function langOf(x) {
-  let l = String(x.l || x.lang || "").toLowerCase();
+function fmt(x){
+  const d=new Date(x);
+  return isNaN(d)?"时间未知":d.toLocaleString("zh-CN",{hour12:false});
+}
 
-  if(["en","english"].includes(l)) return "en";
-  if(["bm","ms","malay","bahasa melayu"].includes(l)) return "bm";
-  if(["zh","cn","chinese"].includes(l)) return "zh";
-  if(["ta","tamil"].includes(l)) return "ta";
-  if(["ja","japanese","日本語"].includes(l)) return "ja";
-  if(["ko","korean","한국어"].includes(l)) return "ko";
+function langOf(x){
+  const l=String(x.l||x.lang||x.language||"").toLowerCase();
+
+  if(["en","english"].includes(l))return "en";
+  if(["bm","ms","malay","bahasa melayu"].includes(l))return "bm";
+  if(["zh","cn","chinese"].includes(l))return "zh";
+  if(["ta","tamil"].includes(l))return "ta";
+  if(["ja","japanese","日本語"].includes(l))return "ja";
+  if(["ko","korean","한국어"].includes(l))return "ko";
 
   return l;
 }
 
-function isDomestic(x) {
-  let c = String(x.country || x.region || "").toLowerCase();
-
-  return !c || [
-    "my","malaysia","马来西亚","国内","malaysian"
-  ].includes(c);
+function isDomestic(x){
+  const c=String(x.country||"").toLowerCase().trim();
+  return ["my","malaysia","马来西亚","malaysian"].includes(c);
 }
 
-function countryId(x) {
-  let c = String(x.country || "").toLowerCase();
+function countryId(x){
+  const c=String(x.country||"").toLowerCase().trim();
 
-  const map = {
+  const map={
     my:"malaysia",
     malaysia:"malaysia",
     "马来西亚":"malaysia",
+    "malaysian":"malaysia",
+
     japan:"japan",
     "日本":"japan",
     jp:"japan",
+
     korea:"korea",
     "south korea":"korea",
     "韩国":"korea",
     kr:"korea",
+
     china:"china",
     "中国":"china",
     cn:"china",
+
     taiwan:"taiwan",
     "台湾":"taiwan",
     tw:"taiwan",
+
     singapore:"singapore",
     "新加坡":"singapore",
     sg:"singapore",
+
     usa:"usa",
     "united states":"usa",
     "美国":"usa",
     us:"usa",
+
     uk:"uk",
     "united kingdom":"uk",
     "英国":"uk",
+
     eu:"eu",
     "european union":"eu",
-    "欧盟":"eu"
+    "欧盟":"eu",
+
+    au:"australia",
+    australia:"australia",
+    "澳大利亚":"australia"
   };
 
-  return map[c] || "";
+  return map[c]||"";
 }
 
-function filtered(list) {
-  let q = $("search").value.trim().toLowerCase();
+function filtered(list){
+  const q=$("search").value.trim().toLowerCase();
 
-  let a = list.filter(x =>
-    !q || [
-      x.h,x.title,x.o,x.source,x.summary
-    ].join(" ").toLowerCase().includes(q)
+  const a=list.filter(x=>
+    !q||[x.h,x.title,x.o,x.source,x.summary].join(" ").toLowerCase().includes(q)
   );
 
-  a.sort((x,y) =>
-    $("sort").value === "old"
-      ? dateValue(x.t || x.published)-dateValue(y.t || y.published)
-      : dateValue(y.t || y.published)-dateValue(x.t || x.published)
+  a.sort((x,y)=>$("sort").value==="old"
+    ?dateValue(x.t||x.published)-dateValue(y.t||y.published)
+    :dateValue(y.t||y.published)-dateValue(x.t||x.published)
   );
 
   return a;
 }
 
-function article(x) {
-  let title = x.h || x.title || "无标题";
-  let source = x.o || x.source || "来源未知";
-  let url = x.u || x.url || "#";
+function article(x){
+  const title=x.h||x.title||"无标题";
+  const source=x.o||x.source||"来源未知";
+  const url=safeLink(x.u||x.url||"#");
 
-  const langName = ({
-    en:"英语",bm:"马来语",zh:"中文",
-    ta:"Tamil",ja:"日语",ko:"韩语"
-  })[langOf(x)] || langOf(x) || "语言未知";
+  const language=({
+    en:"英语",
+    bm:"马来语",
+    zh:"中文",
+    ta:"Tamil",
+    ja:"日语",
+    ko:"韩语"
+  })[langOf(x)]||langOf(x)||"语言未知";
 
-  return `
-    <article class="news-item">
-      <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">
-        ${esc(title)}
-      </a>
-      <div class="meta">
-        ${esc(source)} · ${esc(langName)} · ${esc(fmt(x.t || x.published))}
-        ${x.summary ? " · " + esc(x.summary) : ""}
-      </div>
-    </article>
-  `;
+  return `<article class="news-item">
+    <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a>
+    <div class="meta">
+      ${esc(source)} · ${esc(language)} · ${esc(fmt(x.t||x.published))}
+      ${x.summary?" · "+esc(x.summary):""}
+    </div>
+  </article>`;
 }
 
-function renderList(el,list,empty="暂时没有符合条件的新闻。") {
-  let a = filtered(list);
+function renderList(el,list,empty="暂时没有符合条件的新闻。"){
+  const a=filtered(list);
 
-  $(el).innerHTML = a.length
-    ? a.map(article).join("")
-    : `<div class="empty">${empty}</div>`;
+  $(el).innerHTML=a.length
+    ?a.map(article).join("")
+    :`<div class="empty">${esc(empty)}</div>`;
 }
 
-function domestic() {
+function domestic(){
   return items.filter(isDomestic);
 }
 
-function international() {
-  return items.filter(x => !isDomestic(x) && countryId(x));
+function international(){
+  return items.filter(x=>!isDomestic(x)&&countryId(x));
 }
 
-/* HOME */
+/* 首页 */
+function renderHome(){
+  $("home-languages").innerHTML=LANGS.map(l=>{
+    const arr=domestic().filter(x=>langOf(x)===l.id);
 
-function renderHome() {
-  $("home-languages").innerHTML = LANGS.map(l => {
-    let arr = domestic().filter(x => langOf(x) === l.id);
+    return `<div class="lang-col">
+      <h3>
+        <span class="code">${l.code}</span>
+        <span class="pill">${arr.length} 篇</span>
+      </h3>
 
-    return `
-      <div class="lang-col">
-        <h3>
-          <span class="code">${l.code}</span>
-          <span class="pill">${arr.length} 篇</span>
-        </h3>
-        <div class="muted">${l.name}</div>
-        <div class="language-news-scroll">
-          ${
-            filtered(arr).map(article).join("")
-            || '<div class="empty">暂未收集到新闻</div>'
-          }
-        </div>
-        <button class="btn" data-lang="${l.id}">
-          更多 ${l.label}
-        </button>
+      <div class="muted">${l.name}</div>
+
+      <div class="language-news-scroll">
+        ${filtered(arr).map(article).join("")||'<div class="empty">暂未收集到新闻</div>'}
       </div>
-    `;
+
+      <button class="btn" data-lang="${l.id}">更多 ${l.label}</button>
+    </div>`;
   }).join("");
 
-  $("home-languages").querySelectorAll("[data-lang]")
-    .forEach(b => {
-      b.onclick = () => {
-        activeDomesticLang = b.dataset.lang;
-        showPage("domestic");
-        renderDomestic();
-      };
-    });
+  $("home-languages").querySelectorAll("[data-lang]").forEach(b=>{
+    b.onclick=()=>{
+      activeDomesticLang=b.dataset.lang;
+      showPage("domestic");
+      renderDomestic();
+    };
+  });
 
   renderList("home-latest",filtered(items).slice(0,100));
 
-  let groups = new Map();
+  const groups=new Map();
 
-  domestic().forEach(x => {
-    let key = (x.h || x.title || "").trim().toLowerCase().slice(0,65);
+  domestic().forEach(x=>{
+    const key=(x.h||x.title||"").trim().toLowerCase().slice(0,65);
 
-    if(key) {
-      if(!groups.has(key)) groups.set(key,[]);
+    if(key){
+      if(!groups.has(key))groups.set(key,[]);
       groups.get(key).push(x);
     }
   });
 
-  let candidates = [...groups.values()]
-    .filter(g => g.length > 1)
-    .slice(0,5);
+  const candidates=[...groups.values()].filter(g=>g.length>1).slice(0,5);
 
-  $("home-events").innerHTML = candidates.length
-    ? candidates.map(g => `
-        <div class="news-item">
-          <strong>${esc(g[0].h || g[0].title)}</strong>
-          <div class="meta">${g.length} 篇标题相近的新闻</div>
-        </div>
-      `).join("")
-    : '<div class="empty">暂时没有可显示的事件候选。</div>';
+  $("home-events").innerHTML=candidates.length
+    ?candidates.map(g=>`
+      <div class="news-item">
+        <strong>${esc(g[0].h||g[0].title)}</strong>
+        <div class="meta">${g.length} 篇标题相近的新闻候选</div>
+      </div>
+    `).join("")
+    :'<div class="empty">暂时没有可显示的事件候选。</div>';
 }
 
-/* MALAYSIA DOMESTIC NEWS CATEGORIES */
-
-const DOMESTIC_CATEGORIES = [
+/* 国内分类 */
+const DOMESTIC_CATEGORIES=[
   {id:"all",label:"全部"},
   {id:"politics",label:"政治"},
   {id:"economy",label:"经济"},
@@ -589,401 +2186,1212 @@ const DOMESTIC_CATEGORIES = [
   {id:"other",label:"其他"}
 ];
 
-const CATEGORY_KEYWORDS = {
-  politics:[
-    "政府","部长","首相","国会","议会","选举","政党","政治","内阁","州政府","议员",
-    "government","minister","prime minister","parliament","election","politic","cabinet","mp ",
-    "kerajaan","menteri","perdana menteri","parlimen","pilihan raya","politik","kabinet",
-    "அரசு","அமைச்சர்","தேர்தல்","அரசியல்"
-  ],
-  economy:[
-    "经济","商业","市场","股市","股票","令吉","马币","通胀","通货膨胀","银行","投资","贸易","税务","预算案","薪水","工资",
-    "economy","economic","business","market","stocks","ringgit","inflation","bank","investment","trade","tax","budget","salary",
-    "ekonomi","perniagaan","pasaran","saham","ringgit","inflasi","bank","pelaburan","perdagangan","cukai","belanjawan","gaji",
-    "பொருளாதாரம்","வணிகம்","பங்குச் சந்தை","வங்கி"
-  ],
-  society:[
-    "社会","社区","民生","居民","人民","民众","生活费","物价","福利","慈善","公共服务",
-    "society","community","residents","public","cost of living","welfare",
-    "masyarakat","komuniti","penduduk","rakyat","kos sara hidup","kebajikan",
-    "சமூகம்","மக்கள்","பொது"
-  ],
-  sports:[
-    "体育","足球","篮球","羽毛球","网球","排球","赛车","羽球","运动员","联赛","世界杯","奥运","大马羽总",
-    "sports","football","soccer","basketball","badminton","tennis","volleyball","racing","athlete","league","olympic","world cup",
-    "sukan","bola sepak","badminton","bola keranjang","tenis","atlet","liga","olimpik",
-    "விளையாட்டு","கால்பந்து","கிரிக்கெட்","பூப்பந்து"
-  ],
-  entertainment:[
-    "娱乐","艺人","明星","演员","歌手","电影","电视剧","演唱会","音乐","综艺","网红","影坛","票房",
-    "entertainment","celebrity","actor","actress","singer","movie","film","concert","music","drama","showbiz",
-    "hiburan","selebriti","pelakon","penyanyi","filem","wayang","konsert","muzik",
-    "பொழுதுபோக்கு","நடிகர்","நடிகை","திரைப்படம்","இசை"
-  ],
-  technology:[
-    "科技","人工智能","人工智慧","AI","数码","网络安全","手机","电脑","软件","芯片","电信","互联网","创新",
-    "technology","artificial intelligence","cybersecurity","smartphone","computer","software","chip","telecommunications","internet","innovation",
-    "teknologi","kecerdasan buatan","keselamatan siber","telefon pintar","komputer","perisian","internet","inovasi",
-    "தொழில்நுட்பம்","செயற்கை நுண்ணறிவு","இணையம்"
-  ],
-  education:[
-    "教育","学校","大学","学生","教师","老师","考试","大学生","学费","课程","教育部","校园",
-    "education","school","university","student","teacher","exam","tuition","course","ministry of education","campus",
-    "pendidikan","sekolah","universiti","pelajar","guru","peperiksaan","yuran","kursus","kampus",
-    "கல்வி","பள்ளி","பல்கலைக்கழகம்","மாணவர்","ஆசிரியர்","தேர்வு"
-  ],
-  health:[
-    "健康","医疗","医院","医生","病患","疾病","疫情","卫生","药物","疫苗","卫生部","流感",
-    "health","medical","hospital","doctor","patient","disease","outbreak","ministry of health","vaccine","flu",
-    "kesihatan","perubatan","hospital","doktor","pesakit","penyakit","wabak","vaksin",
-    "சுகாதாரம்","மருத்துவம்","மருத்துவமனை","நோய்","தடுப்பூசி"
-  ],
-  transport:[
-    "交通","公路","大道","铁路","轻快铁","捷运","地铁","巴士","航班","机场","火车","车祸","陆路交通局",
-    "transport","traffic","highway","road","railway","lrt","mrt","bus","flight","airport","train","crash",
-    "pengangkutan","trafik","lebuh raya","jalan raya","kereta api","bas","penerbangan","lapangan terbang","kemalangan",
-    "போக்குவரத்து","சாலை","ரயில்","விமானம்"
-  ],
-  weather:[
-    "天气","气象","暴雨","水灾","洪水","闪电","雷雨","热浪","气温","季候风","台风",
-    "weather","met department","heavy rain","flood","thunderstorm","heatwave","temperature","monsoon","storm",
-    "cuaca","hujan lebat","banjir","ribut petir","gelombang haba","suhu","monsun",
-    "வானிலை","மழை","வெள்ளம்","புயல்"
-  ],
-  crime:[
-    "警方","警察","逮捕","拘捕","罪案","犯罪","法庭","法院","审讯","起诉","诈骗","贪污","反贪会","毒品","车祸死亡",
-    "police","arrest","crime","court","trial","charged","fraud","corruption","macc","drug","investigation",
-    "polis","tangkapan","jenayah","mahkamah","perbicaraan","didakwa","penipuan","rasuah","dadah","siasatan",
-    "காவல்துறை","கைது","குற்றம்","நீதிமன்றம்"
-  ]
+const CATEGORY_KEYWORDS={
+politics:[
+  "政府","部长","首相","国会","议会","选举","政党","政治","内阁","州政府","议员",
+  "government","minister","prime minister","parliament","election","politic","cabinet",
+  "kerajaan","menteri","perdana menteri","parlimen","pilihan raya","politik","kabinet",
+  "அரசு","அமைச்சர்","தேர்தல்","அரசியல்"
+],
+economy:[
+  "经济","商业","市场","股市","股票","令吉","马币","通胀","通货膨胀","银行","投资","贸易","税务","预算案","薪水","工资",
+  "economy","economic","business","market","stocks","ringgit","inflation","bank","investment","trade","tax","budget","salary",
+  "ekonomi","perniagaan","pasaran","saham","inflasi","pelaburan","perdagangan","cukai","belanjawan","gaji"
+],
+society:[
+  "社会","社区","民生","居民","人民","民众","生活费","物价","福利","慈善","公共服务",
+  "society","community","residents","public","cost of living","welfare",
+  "masyarakat","komuniti","penduduk","rakyat","kos sara hidup","kebajikan"
+],
+sports:[
+  "体育","足球","篮球","羽毛球","网球","排球","赛车","运动员","联赛","世界杯","奥运",
+  "sports","football","soccer","basketball","badminton","tennis","volleyball","racing","athlete","league","olympic","world cup",
+  "sukan","bola sepak","atlet","liga","olimpik"
+],
+entertainment:[
+  "娱乐","艺人","明星","演员","歌手","电影","电视剧","演唱会","音乐","综艺","网红","影坛","票房",
+  "entertainment","celebrity","actor","actress","singer","movie","film","concert","music","drama","showbiz",
+  "hiburan","selebriti","pelakon","penyanyi","filem","konsert","muzik"
+],
+technology:[
+  "科技","人工智能","人工智慧","AI","数码","网络安全","手机","电脑","软件","芯片","电信","互联网","创新",
+  "technology","artificial intelligence","cybersecurity","smartphone","computer","software","chip","telecommunications","internet","innovation",
+  "teknologi","kecerdasan buatan","keselamatan siber","telefon pintar","komputer","perisian","inovasi"
+],
+education:[
+  "教育","学校","大学","学生","教师","老师","考试","学费","课程","教育部","校园",
+  "education","school","university","student","teacher","exam","tuition","course","ministry of education","campus",
+  "pendidikan","sekolah","universiti","pelajar","guru","peperiksaan","yuran","kursus","kampus"
+],
+health:[
+  "健康","医疗","医院","医生","病患","疾病","疫情","卫生","药物","疫苗","卫生部","流感",
+  "health","medical","hospital","doctor","patient","disease","outbreak","ministry of health","vaccine","flu",
+  "kesihatan","perubatan","pesakit","penyakit","wabak","vaksin"
+],
+transport:[
+  "交通","公路","大道","铁路","轻快铁","捷运","地铁","巴士","航班","机场","火车","车祸","陆路交通局",
+  "transport","traffic","highway","road","railway","lrt","mrt","bus","flight","airport","train","crash",
+  "pengangkutan","trafik","lebuh raya","jalan raya","kereta api","bas","penerbangan","kemalangan"
+],
+weather:[
+  "天气","气象","暴雨","水灾","洪水","闪电","雷雨","热浪","气温","季候风","台风",
+  "weather","met department","heavy rain","flood","thunderstorm","heatwave","temperature","monsoon","storm",
+  "cuaca","hujan lebat","banjir","ribut petir","gelombang haba","suhu","monsun"
+],
+crime:[
+  "警方","警察","逮捕","拘捕","罪案","犯罪","法庭","法院","审讯","起诉","诈骗","贪污","反贪会","毒品",
+  "police","arrest","crime","court","trial","charged","fraud","corruption","macc","drug","investigation",
+  "polis","tangkapan","jenayah","mahkamah","perbicaraan","didakwa","penipuan","rasuah","dadah","siasatan"
+]
 };
 
-function domesticCategory(x) {
-  const text = [
-    x.h || x.title || "",
-    x.summary || ""
-  ].join(" ").toLowerCase();
+function domesticCategory(x){
+  const text=[x.h||x.title||"",x.summary||""].join(" ").toLowerCase();
 
-  for(const category of DOMESTIC_CATEGORIES) {
-    if(category.id === "all" || category.id === "other") continue;
+  for(const c of DOMESTIC_CATEGORIES){
+    if(c.id==="all"||c.id==="other")continue;
 
-    const words = CATEGORY_KEYWORDS[category.id] || [];
-
-    if(words.some(word => text.includes(word.toLowerCase()))) {
-      return category.id;
+    if((CATEGORY_KEYWORDS[c.id]||[]).some(w=>text.includes(w.toLowerCase()))){
+      return c.id;
     }
   }
 
   return "other";
 }
 
-/* DOMESTIC */
+function renderDomestic(){
+  const languageArr=domestic().filter(x=>langOf(x)===activeDomesticLang);
 
-function renderDomestic() {
-  let languageArr = domestic().filter(x => langOf(x) === activeDomesticLang);
+  const arr=activeDomesticCategory==="all"
+    ?languageArr
+    :languageArr.filter(x=>domesticCategory(x)===activeDomesticCategory);
 
-  let arr = activeDomesticCategory === "all"
-    ? languageArr
-    : languageArr.filter(x => domesticCategory(x) === activeDomesticCategory);
-
-  $("domestic-lang-buttons").innerHTML = LANGS.map(l => `
-    <button class="btn ${activeDomesticLang === l.id ? "selected" : ""}" data-lang="${l.id}">
+  $("domestic-lang-buttons").innerHTML=LANGS.map(l=>`
+    <button class="btn ${activeDomesticLang===l.id?"selected":""}" data-lang="${l.id}">
       ${l.code} · ${l.name}
     </button>
   `).join("");
 
-  $("domestic-lang-buttons").querySelectorAll("button")
-    .forEach(b => {
-      b.onclick = () => {
-        activeDomesticLang = b.dataset.lang;
-        renderDomestic();
-      };
-    });
+  $("domestic-lang-buttons").querySelectorAll("button").forEach(b=>{
+    b.onclick=()=>{
+      activeDomesticLang=b.dataset.lang;
+      renderDomestic();
+    };
+  });
 
-  $("domestic-category-buttons").innerHTML = DOMESTIC_CATEGORIES.map(c => {
-    const count = c.id === "all"
-      ? languageArr.length
-      : languageArr.filter(x => domesticCategory(x) === c.id).length;
+  $("domestic-category-buttons").innerHTML=DOMESTIC_CATEGORIES.map(c=>{
+    const count=c.id==="all"
+      ?languageArr.length
+      :languageArr.filter(x=>domesticCategory(x)===c.id).length;
 
-    return `
-      <button class="btn ${activeDomesticCategory === c.id ? "selected" : ""}"
-              data-category="${c.id}">
-        ${c.label} <span class="pill">${count}</span>
-      </button>
-    `;
+    return `<button class="btn ${activeDomesticCategory===c.id?"selected":""}" data-category="${c.id}">
+      ${c.label} <span class="pill">${count}</span>
+    </button>`;
   }).join("");
 
-  $("domestic-category-buttons").querySelectorAll("button")
-    .forEach(b => {
-      b.onclick = () => {
-        activeDomesticCategory = b.dataset.category;
-        renderDomestic();
-      };
-    });
+  $("domestic-category-buttons").querySelectorAll("button").forEach(b=>{
+    b.onclick=()=>{
+      activeDomesticCategory=b.dataset.category;
+      renderDomestic();
+    };
+  });
 
-  $("domestic-category-count").textContent =
+  $("domestic-category-count").textContent=
     `当前显示 ${arr.length} 篇 · ${
-      activeDomesticCategory === "all"
-        ? "全部版块"
-        : DOMESTIC_CATEGORIES.find(c => c.id === activeDomesticCategory)?.label || "全部版块"
+      activeDomesticCategory==="all"
+      ?"全部版块"
+      :DOMESTIC_CATEGORIES.find(c=>c.id===activeDomesticCategory)?.label
     }`;
 
-  let sources = [...new Set(
-    arr.map(x => x.o || x.source).filter(Boolean)
-  )];
-
-  $("domestic-list").innerHTML = `
-    <div class="stat">
-      ${sources.map(s => `<span class="pill">${esc(s)}</span>`).join("")}
-    </div>
-    <div id="domestic-articles"></div>
-  `;
-
-  renderList(
-    "domestic-articles",
-    arr,
-    "这个语言／版块暂时没有相关新闻。"
-  );
-
-  $("domestic-articles").classList.add("scrollable-news");
+  $("domestic-list").innerHTML=
+    filtered(arr).map(article).join("")||
+    '<div class="empty">这个语言／版块暂时没有相关新闻。</div>';
 }
 
-/* INTERNATIONAL */
-
-function renderInternational() {
-  $("country-picker").innerHTML = COUNTRIES.map(c => `
-    <button class="country ${
-      selectedCountries.includes(c.id) ? "selected" : ""
-    }" data-country="${c.id}">
+/* 国际新闻 */
+function renderInternational(){
+  $("country-picker").innerHTML=COUNTRIES.map(c=>`
+    <button class="country ${selectedCountries.includes(c.id)?"selected":""}" data-country="${c.id}">
       <strong>${c.flag} ${c.name}</strong>
       <span>${c.en}</span>
     </button>
   `).join("");
 
-  $("country-picker").querySelectorAll("button")
-    .forEach(b => {
-      b.onclick = () => {
-        let id = b.dataset.country;
+  $("country-picker").querySelectorAll("button").forEach(b=>{
+    b.onclick=()=>{
+      const id=b.dataset.country;
 
-        if(selectedCountries.includes(id)) {
-          selectedCountries = selectedCountries.filter(x => x !== id);
-        } else if(selectedCountries.length < 4) {
-          selectedCountries.push(id);
-        } else {
-          alert("最多同时选择四个国家／地区。");
-        }
+      if(selectedCountries.includes(id)){
+        selectedCountries=selectedCountries.filter(x=>x!==id);
+      }else if(selectedCountries.length<4){
+        selectedCountries.push(id);
+      }else{
+        alert("最多同时选择四个国家／地区。");
+      }
 
-        renderInternational();
-      };
-    });
-
-  $("selected-count").textContent =
-    `已选择 ${selectedCountries.length} / 4`;
-
-  let arr = international().filter(x =>
-    !selectedCountries.length ||
-    selectedCountries.includes(countryId(x))
-  );
-
-  renderList(
-    "international-list",
-    arr,
-    "没有对应国家的新闻。请检查新闻来源设置。"
-  );
-
-  $("country-columns").innerHTML = selectedCountries.length
-    ? selectedCountries.map(id => {
-        let c = COUNTRIES.find(x => x.id === id);
-        let news = international().filter(x => countryId(x) === id);
-
-        return `
-          <div class="country-column">
-            <h3>${c.flag} ${c.name}</h3>
-            <div class="muted">${news.length} 篇新闻</div>
-            ${
-              filtered(news).map(article).join("")
-              || '<div class="empty">暂无新闻</div>'
-            }
-          </div>
-        `;
-      }).join("")
-    : '<div class="empty">选择最多四个国家／地区，即可并列浏览。</div>';
-}
-
-/* COMPARE */
-
-function renderCompare() {
-  const query = ($("compare-query")?.value || "").trim().toLowerCase();
-  const country = $("compare-country")?.value || "all";
-  const language = $("compare-language")?.value || "all";
-
-  let a = items.filter(x => {
-    const title = x.h || x.title || "";
-
-    const text = [
-      title,
-      x.summary || "",
-      x.o || x.source || ""
-    ].join(" ").toLowerCase();
-
-    const countryMatch = country === "all" ||
-      (country === "malaysia" ? isDomestic(x) : countryId(x) === country);
-
-    const languageMatch = language === "all" || langOf(x) === language;
-
-    return (!query || text.includes(query)) && countryMatch && languageMatch;
+      renderInternational();
+    };
   });
 
-  a.sort((x,y) =>
-    dateValue(y.t || y.published) - dateValue(x.t || x.published)
+  $("selected-count").textContent=`已选择 ${selectedCountries.length} / 4`;
+
+  const arr=international().filter(x=>
+    !selectedCountries.length||selectedCountries.includes(countryId(x))
   );
 
-  const shown = a.slice(0,50);
+  renderList("international-list",arr,"没有对应国家的新闻。请检查新闻来源设置。");
 
-  $("compare-result-count").textContent =
-    `找到 ${a.length} 篇报道 · 当前显示 ${shown.length} 篇`;
+  $("country-columns").innerHTML=selectedCountries.length
+    ?selectedCountries.map(id=>{
+      const c=COUNTRIES.find(x=>x.id===id);
+      const news=international().filter(x=>countryId(x)===id);
 
-  $("compare-candidates").innerHTML = shown.length
-    ? shown.map(x => {
-        const title = x.h || x.title || "无标题";
-        const source = x.o || x.source || "来源未知";
-        const url = x.u || x.url || "#";
-
-        const countryName = isDomestic(x)
-          ? "马来西亚"
-          : (COUNTRIES.find(c => c.id === countryId(x))?.name || x.country || "国家未知");
-
-        const langName = ({
-          en:"英语",
-          bm:"马来语",
-          zh:"中文",
-          ta:"Tamil",
-          ja:"日语",
-          ko:"韩语"
-        })[langOf(x)] || langOf(x) || "语言未知";
-
-        return `
-          <article class="news-item compare-story">
-            <div class="compare-story-tags">
-              <span>${esc(countryName)}</span>
-              <span>${esc(langName)}</span>
-            </div>
-            <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">
-              <strong>${esc(title)}</strong>
-            </a>
-            <div class="meta">
-              ${esc(source)} · ${esc(fmt(x.t || x.published))}
-            </div>
-          </article>
-        `;
-      }).join("")
-    : '<div class="empty">没有找到符合条件的报道。试试更短的关键词，或清除筛选条件。</div>';
-
-  const timeline = [...shown].sort((x,y) =>
-    dateValue(x.t || x.published) - dateValue(y.t || y.published)
-  );
-
-  $("compare-timeline").innerHTML = timeline.length
-    ? timeline.map(x => `
-        <div class="timeline-item">
-          <div class="timeline-date">${esc(fmt(x.t || x.published))}</div>
-          <div class="timeline-content">
-            <strong>${esc(x.h || x.title || "无标题")}</strong>
-            <div class="meta">${esc(x.o || x.source || "来源未知")}</div>
-          </div>
-        </div>
-      `).join("")
-    : '<div class="empty">暂无可显示的时间线。</div>';
+      return `<div class="country-column">
+        <h3>${c.flag} ${c.name}</h3>
+        <div class="muted">${news.length} 篇新闻</div>
+        ${filtered(news).map(article).join("")||'<div class="empty">暂无新闻</div>'}
+      </div>`;
+    }).join("")
+    :'<div class="empty">选择最多四个国家／地区，即可并列浏览。</div>';
 }
 
-/* SOURCES */
+/* 同一事件比较 */
+function renderCompare(){
+  const query=($("compare-query")?.value||"").trim().toLowerCase();
+  const country=$("compare-country")?.value||"all";
+  const language=$("compare-language")?.value||"all";
 
-function renderSources() {
-  let m = new Map();
+  let a=items.filter(x=>{
+    const text=[x.h||x.title||"",x.summary||"",x.o||x.source||""].join(" ").toLowerCase();
 
-  items.forEach(x => {
-    let k = x.o || x.source || "来源未知";
+    const countryMatch=
+      country==="all"||
+      (country==="malaysia"?isDomestic(x):countryId(x)===country);
+
+    const languageMatch=language==="all"||langOf(x)===language;
+
+    return (!query||text.includes(query))&&countryMatch&&languageMatch;
+  });
+
+  a.sort((x,y)=>dateValue(y.t||y.published)-dateValue(x.t||x.published));
+
+  const shown=a.slice(0,50);
+
+  $("compare-result-count").textContent=
+    `找到 ${a.length} 篇报道 · 当前显示 ${shown.length} 篇`;
+
+  $("compare-candidates").innerHTML=shown.length
+    ?shown.map(x=>{
+      const title=x.h||x.title||"无标题";
+      const source=x.o||x.source||"来源未知";
+      const url=safeLink(x.u||x.url||"#");
+
+      const countryName=isDomestic(x)
+        ?"马来西亚"
+        :(COUNTRIES.find(c=>c.id===countryId(x))?.name||x.country||"国家未知");
+
+      const langName=({
+        en:"英语",
+        bm:"马来语",
+        zh:"中文",
+        ta:"Tamil",
+        ja:"日语",
+        ko:"韩语"
+      })[langOf(x)]||langOf(x)||"语言未知";
+
+      return `<article class="news-item compare-story">
+        <div class="compare-story-tags">
+          <span>${esc(countryName)}</span>
+          <span>${esc(langName)}</span>
+        </div>
+
+        <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">
+          <strong>${esc(title)}</strong>
+        </a>
+
+        <div class="meta">${esc(source)} · ${esc(fmt(x.t||x.published))}</div>
+      </article>`;
+    }).join("")
+    :'<div class="empty">没有找到符合条件的报道。试试更短的关键词，或清除筛选条件。</div>';
+
+  const timeline=[...shown].sort((x,y)=>
+    dateValue(x.t||x.published)-dateValue(y.t||y.published)
+  );
+
+  $("compare-timeline").innerHTML=timeline.length
+    ?timeline.map(x=>`
+      <div class="timeline-item">
+        <div class="timeline-date">${esc(fmt(x.t||x.published))}</div>
+        <div class="timeline-content">
+          <strong>${esc(x.h||x.title||"无标题")}</strong>
+          <div class="meta">${esc(x.o||x.source||"来源未知")}</div>
+        </div>
+      </div>
+    `).join("")
+    :'<div class="empty">暂无可显示的时间线。</div>';
+}
+
+/* 媒体目录 */
+function renderSources(){
+  const m=new Map();
+
+  items.forEach(x=>{
+    const k=x.o||x.source||"来源未知";
     m.set(k,(m.get(k)||0)+1);
   });
 
-  $("source-list").innerHTML = [...m]
-    .sort((a,b) => b[1]-a[1])
-    .map(([s,n]) => `
+  $("source-list").innerHTML=[...m]
+    .sort((a,b)=>b[1]-a[1])
+    .map(([s,n])=>`
       <div class="news-item">
         <strong>${esc(s)}</strong>
         <span class="pill">${n} 篇</span>
       </div>
-    `).join("")
-    || '<div class="empty">暂无媒体数据。</div>';
+    `)
+    .join("")||'<div class="empty">暂无媒体数据。</div>';
 }
 
-/* PAGE NAVIGATION */
+/* 选举资料 */
+const ELECTION_CONFIG={
+  my:{
+    flag:"🇲🇾",
+    name:"马来西亚",
+    subtitle:"Malaysia Election Tracker",
+    authority:"马来西亚选举委员会 SPR",
 
-function showPage(p) {
-  document.querySelectorAll("main section")
-    .forEach(s => s.classList.add("hidden"));
+    official:[
+      {name:"SPR 官方网站",url:"https://www.spr.gov.my/"},
+      {name:"SPR 官方选举仪表板",url:"https://dashboard.spr.gov.my/"},
+      {name:"MySPR Semak",url:"https://mysprsemak.spr.gov.my/"}
+    ],
 
-  $("page-"+p).classList.remove("hidden");
+    types:[
+      "全国大选（PRU）",
+      "州选举（PRN）",
+      "国会议席补选（PRK）",
+      "州议席补选"
+    ],
 
-  document.querySelectorAll("nav button")
-    .forEach(b => b.classList.toggle(
-      "active",b.dataset.page === p
-    ));
+    sourceNames:[
+      "星洲日报","中国报","南洋商报","东方日报","光华日报","光明日报",
+      "BERNAMA","The Star","New Straits Times","Free Malaysia Today",
+      "Malay Mail","Berita Harian","Harian Metro","Utusan Malaysia",
+      "Sinar Harian","Makkal Osai"
+    ],
+
+    keywords:[
+      "选举","投票","选委会","候选人","提名","计票","选区","议席","大选",
+      "州选","补选","政党","投票率","胜选","落败",
+      "election","polling","ballot","candidate","nomination","counting",
+      "constituency","by-election","general election","pilihan raya",
+      "mengundi","calon","undi","kerusi","penamaan calon"
+    ]
+  },
+
+  sg:{
+    flag:"🇸🇬",
+    name:"新加坡",
+    subtitle:"Singapore Election Tracker",
+    authority:"新加坡选举局 Elections Department Singapore",
+
+    official:[
+      {name:"Elections Department Singapore",url:"https://www.eld.gov.sg/"},
+      {name:"新加坡政府网站",url:"https://www.gov.sg/"}
+    ],
+
+    types:["国会大选","国会议席补选","总统选举"],
+
+    sourceNames:[
+      "联合早报","8视界","新明日报","CNA","The Straits Times","Mothership"
+    ],
+
+    keywords:[
+      "选举","大选","投票","候选人","国会","议席","政党",
+      "election","polling","candidate","parliament","constituency",
+      "general election","presidential election"
+    ]
+  },
+
+  tw:{
+    flag:"🇹🇼",
+    name:"台湾",
+    subtitle:"Taiwan Election Tracker",
+    authority:"中央选举委员会",
+
+    official:[
+      {name:"中央选举委员会",url:"https://www.cec.gov.tw/"},
+      {name:"选举资料查询",url:"https://db.cec.gov.tw/"}
+    ],
+
+    types:[
+      "总统选举",
+      "立法委员选举",
+      "地方县市长选举",
+      "地方议员及其他公职选举"
+    ],
+
+    sourceNames:[
+      "中央社","联合新闻网","自由时报","ETtoday","TVBS"
+    ],
+
+    keywords:[
+      "選舉","投票","總統","立委","候選人","政黨","開票","縣市長",
+      "選區","罷免","補選","選票","election","polling","candidate",
+      "presidential election"
+    ]
+  },
+
+  us:{
+    flag:"🇺🇸",
+    name:"美国",
+    subtitle:"United States Election Tracker",
+    authority:"美国各州选举主管机关及联邦选举委员会",
+
+    official:[
+      {name:"Federal Election Commission",url:"https://www.fec.gov/"},
+      {name:"USA.gov Elections",url:"https://www.usa.gov/elections"},
+      {name:"National Association of Secretaries of State",url:"https://www.nass.org/"}
+    ],
+
+    types:[
+      "总统选举",
+      "参议院选举",
+      "众议院选举",
+      "州长及州议会选举",
+      "地方选举及初选"
+    ],
+
+    sourceNames:[
+      "纽约时报","华盛顿邮报","CNN","The Wall Street Journal","NPR","Reuters"
+    ],
+
+    keywords:[
+      "election","presidential election","midterm","primary election",
+      "senate","house of representatives","congress","governor","ballot",
+      "polling","vote","candidate","electoral college","voting"
+    ]
+  }
+};
+
+/*
+  行政边界资料来自 geoBoundaries gbOpen API。
+  注意：ADM1 是一级行政区，不等于国会议席或州议席选区。
+  专用选区边界尚未接入前，不会把行政区误标为选区。
+*/
+const ELECTION_BOUNDARY_CONFIG={
+  my:{iso3:"MYS",level:"ADM1",label:"马来西亚州属行政边界"},
+  sg:{iso3:"SGP",level:"ADM1",label:"新加坡行政区域"},
+  tw:{iso3:"TWN",level:"ADM1",label:"台湾县市行政区域"},
+  us:{iso3:"USA",level:"ADM1",label:"美国州级行政边界"}
+};
+
+const ELECTION_BOUNDARY_API=
+  "https://www.geoboundaries.org/api/current/gbOpen";
+
+/* 选举类型关键词筛选 */
+const ELECTION_TYPE_CONFIG={
+  pru:{
+    label:"全国大选",
+    keywords:["pru","general election","全国大选","大选","pilihan raya umum"]
+  },
+  prn:{
+    label:"州选举",
+    keywords:["prn","state election","州选举","州选","pilihan raya negeri"]
+  },
+  prk:{
+    label:"补选",
+    keywords:[
+      "prk","by-election","by election","补选","国席补选",
+      "州席补选","pilihan raya kecil"
+    ]
+  }
+};
+
+function electionTypeMatches(x){
+  if(electionCountry!=="my"||electionType==="all")return true;
+
+  const config=ELECTION_TYPE_CONFIG[electionType];
+  if(!config)return true;
+
+  const text=[x.h||x.title||"",x.summary||""].join(" ").toLowerCase();
+
+  return config.keywords.some(k=>text.includes(k.toLowerCase()));
+}
+
+function electionMatches(x,config){
+  const text=[x.h||x.title||"",x.summary||""].join(" ").toLowerCase();
+  return config.keywords.some(k=>text.includes(k.toLowerCase()));
+}
+
+function electionNews(country){
+  const config=ELECTION_CONFIG[country];
+  if(!config)return [];
+
+  return items.filter(x=>{
+    if(country==="my"&&!isDomestic(x))return false;
+
+    if(country!=="my"){
+      const expected={
+        sg:"singapore",
+        tw:"taiwan",
+        us:"usa"
+      }[country];
+
+      if(countryId(x)!==expected)return false;
+    }
+
+    return electionMatches(x,config)&&
+      (country!=="my"||electionTypeMatches(x));
+
+  }).sort((a,b)=>
+    dateValue(b.t||b.published)-dateValue(a.t||a.published)
+  );
+}
+
+function electionSourceSummary(news,config){
+  const counts=new Map();
+
+  news.forEach(x=>{
+    const source=x.o||x.source||"来源未知";
+    counts.set(source,(counts.get(source)||0)+1);
+  });
+
+  const found=[...counts.entries()].sort((a,b)=>b[1]-a[1]);
+
+  const known=config.sourceNames.map(name=>{
+    const match=found.find(([source])=>
+      source.toLowerCase()===name.toLowerCase()
+    );
+
+    return {
+      name,
+      count:match?match[1]:0
+    };
+  });
+
+  const additional=found.filter(([source])=>
+    !config.sourceNames.some(name=>
+      name.toLowerCase()===source.toLowerCase()
+    )
+  );
+
+  return {known,additional,found};
+}
+
+function electionOfficialLinks(config){
+  return config.official.map(x=>`
+    <a class="election-action secondary"
+       href="${esc(safeLink(x.url))}"
+       target="_blank"
+       rel="noopener noreferrer">
+      ${esc(x.name)} ↗
+    </a>
+  `).join("");
+}
+
+/* 互动选举地图 */
+function electionMapMarkup(country){
+  const config=ELECTION_BOUNDARY_CONFIG[country];
+  const label=config?config.label:"行政区域边界";
+
+  return `<div class="panel election-map-panel">
+    <div class="election-section-title">
+      <h2>互动选举地图</h2>
+      <span>Interactive Election Map</span>
+    </div>
+
+    <p class="muted">
+      缩放地图、移动地图并点击地区，查看行政边界资料及已接入的选举结果。
+    </p>
+
+    <div class="election-map-toolbar">
+      <select id="election-map-layer-select" aria-label="选择地图类型">
+        <option value="parliament" disabled>国会议席／选区边界（专用数据待接入）</option>
+        <option value="state" selected>${esc(label)}（ADM1）</option>
+      </select>
+      <span class="pill" id="election-map-data-label">等待地图资料</span>
+    </div>
+
+    <div class="election-map-layout">
+      <div>
+        <div id="election-interactive-map" class="election-map"></div>
+
+        <div class="map-legend">
+          <div class="map-legend-item">
+            <span class="map-legend-dot" style="background:#aeb7c2"></span>
+            尚无选举结果资料
+          </div>
+
+          <div class="map-legend-item">
+            <span class="map-legend-dot" style="background:#0071e3"></span>
+            已提供选举资料
+          </div>
+        </div>
+      </div>
+
+      <aside class="election-map-info" id="election-map-info">
+        <h3>地区资料</h3>
+        <div class="map-info-value">点击地图上的行政区域，查看边界资料。</div>
+        <div class="map-status" id="election-map-status">正在准备地图……</div>
+      </aside>
+    </div>
+
+    <div class="election-note">
+      当前地图使用 geoBoundaries 的 ADM1 一级行政边界：马来西亚为州属／联邦直辖区级别，新加坡为行政区域，台湾为县市级别，美国为州级边界。它们不是国会议席或州议席选区边界，也不包含选举成绩。只有接入经核实的选举数据后，地图才会显示候选人、政党及票数。
+      数据来源：geoBoundaries gbOpen。使用时须遵守各数据集的许可及署名要求。
+    </div>
+  </div>`;
+}
+
+function mapProperty(properties,keys){
+  for(const key of keys){
+    const value=properties?.[key];
+
+    if(
+      value!==undefined&&
+      value!==null&&
+      String(value).trim()!==""
+    ){
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function mapFeatureInfo(feature){
+  const p=feature.properties||{};
+
+  const name=mapProperty(p,[
+    "shapeName","shapeName_1","NAME_1","name","NAME","Name",
+    "constituency","CONSTITUENCY","district","DISTRICT",
+    "state","STATE","ADM1_EN","ADM1_ZH"
+  ])||"未命名区域";
+
+  return {
+    name,
+    country:mapProperty(p,["shapeGroup","shapeGroup_1","country","COUNTRY"]),
+    areaType:mapProperty(p,["shapeType","shapeType_1","admin_level","TYPE"]),
+    code:mapProperty(p,["shapeISO","shapeID","GID_1","ISO_1"]),
+    year:mapProperty(p,["shapeYear","year","YEAR"]),
+    party:mapProperty(p,["party","PARTY","winner","WINNER","winning_party"]),
+    candidate:mapProperty(p,["candidate","CANDIDATE","winner_name","candidate_name"]),
+    votes:mapProperty(p,["votes","VOTES","total_votes","vote_count"]),
+    percentage:mapProperty(p,["percentage","PERCENTAGE","vote_share","vote_percent"]),
+    majority:mapProperty(p,["majority","MAJORITY","majority_votes"]),
+    result:mapProperty(p,["result","RESULT","status"])
+  };
+}
+
+function showMapFeature(feature){
+  const d=mapFeatureInfo(feature);
+
+  const rows=[
+    ["地区名称",d.name],
+    ["国家／地区",d.country],
+    ["边界级别",d.areaType],
+    ["地区代码",d.code],
+    ["边界年份",d.year],
+    ["胜出政党",d.party],
+    ["候选人",d.candidate],
+    ["得票数",d.votes],
+    ["得票率",d.percentage],
+    ["多数票",d.majority],
+    ["结果状态",d.result]
+  ].filter(x=>x[1]!==""&&x[1]!==null&&x[1]!==undefined);
+
+  $("election-map-info").innerHTML=`
+    <h3>${esc(d.name)}</h3>
+
+    ${rows.map(([label,value])=>`
+      <div class="map-info-row">
+        <span class="map-info-label">${esc(label)}</span>
+        <div class="map-info-value"><strong>${esc(value)}</strong></div>
+      </div>
+    `).join("")}
+
+    ${!d.party&&!d.candidate&&!d.votes&&!d.percentage&&!d.result
+      ?'<div class="map-status">目前载入的是行政边界资料，并没有包含候选人、政党或投票结果。选举成绩不会由地图边界推算。</div>'
+      :""
+    }
+  `;
+}
+
+function mapStyle(feature){
+  const d=mapFeatureInfo(feature);
+  const hasResult=!!(
+    d.party||d.candidate||d.votes||d.percentage||d.result
+  );
+
+  return {
+    color:"#ffffff",
+    weight:1.5,
+    opacity:1,
+    fillColor:hasResult?"#0071e3":"#aeb7c2",
+    fillOpacity:hasResult?.58:.45
+  };
+}
+
+async function fetchElectionGeoJSON(country){
+  const config=ELECTION_BOUNDARY_CONFIG[country];
+  if(!config)throw new Error("尚未配置这个国家或地区的行政边界资料");
+
+  const metadataUrl=
+    `${ELECTION_BOUNDARY_API}/${config.iso3}/${config.level}/`;
+
+  const metadataResponse=await fetch(metadataUrl,{cache:"no-store"});
+  if(!metadataResponse.ok){
+    throw new Error(`geoBoundaries API HTTP ${metadataResponse.status}`);
+  }
+
+  const metadata=await metadataResponse.json();
+  const urls=[metadata.simplifiedGeometryGeoJSON,metadata.gjDownloadURL]
+    .filter((url,index,array)=>url&&array.indexOf(url)===index);
+
+  if(!urls.length){
+    throw new Error("geoBoundaries 没有提供可用的 GeoJSON 下载地址");
+  }
+
+  let lastError=null;
+
+  for(const url of urls){
+    try{
+      const response=await fetch(url,{cache:"no-store"});
+      if(!response.ok)throw new Error(`GeoJSON HTTP ${response.status}`);
+
+      const geojson=await response.json();
+      if(!geojson||!(["FeatureCollection","Feature"].includes(geojson.type))){
+        throw new Error("下载内容不是有效的 GeoJSON");
+      }
+
+      if(geojson.type==="FeatureCollection"&&!Array.isArray(geojson.features)){
+        throw new Error("GeoJSON FeatureCollection 缺少 features 数组");
+      }
+
+      return {geojson,metadata};
+    }catch(error){
+      lastError=error;
+    }
+  }
+
+  throw lastError||new Error("无法下载 GeoJSON 边界文件");
+}
+
+async function loadElectionMap(country,layerType="state"){
+  const status=$("election-map-status");
+  const label=$("election-map-data-label");
+
+  if(!window.L){
+    if(status)status.textContent="Leaflet 地图库未能载入，请检查网络连接。";
+    return;
+  }
+
+  const requestId=++electionMapRequest;
+  electionMapCountry=country;
+  electionMapLayerType=layerType;
+
+  const mapElement=$("election-interactive-map");
+  if(!mapElement)return;
+
+  if(electionMap){
+    electionMap.remove();
+    electionMap=null;
+    electionMapLayer=null;
+  }
+
+  electionMap=L.map(mapElement,{
+    zoomControl:true,
+    scrollWheelZoom:true
+  }).setView(
+    country==="my"?[4.2,102.2]:
+    country==="sg"?[1.35,103.82]:
+    country==="tw"?[23.7,121]:
+    [39,-98],
+    country==="my"?6:
+    country==="sg"?11:
+    country==="tw"?7:
+    4
+  );
+
+  L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    {
+      attribution:'&copy; OpenStreetMap &copy; CARTO',
+      subdomains:"abcd",
+      maxZoom:19
+    }
+  ).addTo(electionMap);
+
+  if(layerType!=="state"){
+    if(label)label.textContent="专用选区数据待接入";
+    if(status){
+      status.className="map-status error";
+      status.textContent="目前没有接入经过核实的国会议席／州议席 GeoJSON。请先选择行政区域边界；不会用行政区地图冒充选区地图。";
+    }
+    setTimeout(()=>electionMap?.invalidateSize(),100);
+    return;
+  }
+
+  if(label)label.textContent="正在读取行政边界";
+  if(status){
+    status.className="map-status";
+    status.textContent="正在从 geoBoundaries API 读取最新可用的行政边界……";
+  }
+
+  try{
+    const {geojson,metadata}=await fetchElectionGeoJSON(country);
+    if(requestId!==electionMapRequest)return;
+
+    electionMapLayer=L.geoJSON(geojson,{
+      style:mapStyle,
+      onEachFeature:(feature,layer)=>{
+        const d=mapFeatureInfo(feature);
+        layer.bindTooltip(esc(d.name),{sticky:true});
+
+        layer.on({
+          click:()=>{
+            showMapFeature(feature);
+            layer.setStyle({weight:3,color:"#0071e3",fillOpacity:.8});
+          },
+          mouseover:e=>{
+            e.target.setStyle({weight:2,color:"#0071e3",fillOpacity:.72});
+          },
+          mouseout:e=>{
+            if(electionMapLayer)electionMapLayer.resetStyle(e.target);
+          }
+        });
+      }
+    }).addTo(electionMap);
+
+    if(electionMapLayer.getBounds().isValid()){
+      electionMap.fitBounds(electionMapLayer.getBounds(),{padding:[15,15]});
+    }
+
+    const count=electionMapLayer.getLayers().length;
+    if(label)label.textContent="行政边界已载入";
+    if(status){
+      status.className="map-status success";
+      status.textContent=
+        `已载入 ${count} 个行政区域。资料：${metadata.boundaryName||country.toUpperCase()} · ${metadata.boundaryType||"ADM1"} · 代表年份 ${metadata.boundaryYearRepresented||"未注明"}。边界来源：${metadata.boundarySource||"geoBoundaries"}。点击地图查看地区资料。`;
+    }
+  }catch(error){
+    if(requestId!==electionMapRequest)return;
+    if(label)label.textContent="地图边界未载入";
+    if(status){
+      status.className="map-status error";
+      status.textContent=
+        `无法载入 ${country.toUpperCase()} 行政边界：${error.message}。请检查网络、API 可用性或浏览器跨域限制。`;
+    }
+  }
+
+  setTimeout(()=>electionMap?.invalidateSize(),150);
+}
+
+function initElectionMap(country){
+  const select=$("election-map-layer-select");
+  if(!select)return;
+
+  select.onchange=()=>loadElectionMap(country,select.value);
+  loadElectionMap(country,select.value||"state");
+}
+
+/* 选举页面 */
+function electionTypeButtons(){
+  return `<div class="election-type-area">
+    <div class="election-type-heading">🇲🇾 马来西亚选举类型</div>
+
+    <div class="election-type-buttons">
+      <button class="election-type-button ${electionType==="pru"?"active":""}"
+              data-election-type="pru">
+        全国大选
+        <small>PRU · General Election</small>
+      </button>
+
+      <button class="election-type-button ${electionType==="prn"?"active":""}"
+              data-election-type="prn">
+        州选举
+        <small>PRN · State Election</small>
+      </button>
+
+      <button class="election-type-button ${electionType==="prk"?"active":""}"
+              data-election-type="prk">
+        补选
+        <small>PRK · By-election</small>
+      </button>
+    </div>
+  </div>`;
+}
+
+function renderElectionDetail(country){
+  const config=ELECTION_CONFIG[country];
+  if(!config)return;
+
+  const news=electionNews(country);
+  const report=electionSourceSummary(news,config);
+  const totalSources=report.found.length;
+
+  const sourceGroups=report.known.map(s=>`
+    <span class="election-source-tag">
+      ${esc(s.name)}
+      <em>${s.count?s.count+" 篇":"暂无报道"}</em>
+    </span>
+  `).join("");
+
+  const additionalGroups=report.additional.map(([name,count])=>`
+    <span class="election-source-tag">
+      ${esc(name)}
+      <em>${count} 篇</em>
+    </span>
+  `).join("");
+
+  let progressContent="";
+
+  if(country==="my"){
+    progressContent=`
+      <div class="election-info-grid">
+        <div class="election-info-card">
+          <h3>选举类型</h3>
+          <p>${config.types.map(esc).join(" · ")}</p>
+          <div class="election-status official">官方选举机构资料</div>
+        </div>
+
+        <div class="election-info-card">
+          <h3>实时选举进度</h3>
+          <p>
+            请通过 SPR 官方仪表板确认目前是否有选举正在举行，
+            以及最新投票和计票进度。
+          </p>
+          <div class="election-status warning">以 SPR 实时公布为准</div>
+          <a class="election-action"
+             href="https://dashboard.spr.gov.my/"
+             target="_blank"
+             rel="noopener noreferrer">
+            查看 SPR 实时仪表板 ↗
+          </a>
+        </div>
+      </div>
+
+      <div class="election-note">
+        此页面不会自行推算或伪造投票率、计票数字和候选人胜负。
+        若 SPR 未提供可供外部读取的数据，将引导用户查看官方仪表板。
+      </div>
+    `;
+  }
+
+  if(country==="sg"){
+    progressContent=`
+      <div class="election-info-grid">
+        <div class="election-info-card">
+          <h3>选举类型</h3>
+          <p>${config.types.map(esc).join(" · ")}</p>
+          <div class="election-status official">官方选举机构</div>
+        </div>
+
+        <div class="election-info-card">
+          <h3>选举进度及结果</h3>
+          <p>查看新加坡选举局公布的选举日期、提名、投票安排及最终成绩。</p>
+          <a class="election-action"
+             href="https://www.eld.gov.sg/"
+             target="_blank"
+             rel="noopener noreferrer">
+            查看官方选举资料 ↗
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  if(country==="tw"){
+    progressContent=`
+      <div class="election-info-grid">
+        <div class="election-info-card">
+          <h3>选举类型</h3>
+          <p>${config.types.map(esc).join(" · ")}</p>
+          <div class="election-status official">中央选举委员会</div>
+        </div>
+
+        <div class="election-info-card">
+          <h3>选举进度及成绩</h3>
+          <p>查看中央选举委员会公布的候选人、投票情况、开票结果及历届选举数据。</p>
+          <a class="election-action"
+             href="https://www.cec.gov.tw/"
+             target="_blank"
+             rel="noopener noreferrer">
+            查看中央选举委员会 ↗
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  if(country==="us"){
+    progressContent=`
+      <div class="election-info-grid">
+        <div class="election-info-card">
+          <h3>选举类型</h3>
+          <p>${config.types.map(esc).join(" · ")}</p>
+          <div class="election-status official">官方资料入口</div>
+        </div>
+
+        <div class="election-info-card">
+          <h3>当前选举状态</h3>
+          <p>请通过官方选举日历和各州选举主管机关确认下一场选举及当前投票安排。</p>
+          <div class="election-status warning">需要官方实时核实</div>
+          <a class="election-action"
+             href="https://www.usa.gov/elections"
+             target="_blank"
+             rel="noopener noreferrer">
+            查看美国当前选举资料 ↗
+          </a>
+        </div>
+
+        <div class="election-info-card">
+          <h3>联邦选举资料</h3>
+          <p>
+            联邦选举委员会提供联邦层面的竞选财务及相关选举资料。
+            各州投票结果以各州官方机构为准。
+          </p>
+          <a class="election-action secondary"
+             href="https://www.fec.gov/"
+             target="_blank"
+             rel="noopener noreferrer">
+            Federal Election Commission ↗
+          </a>
+        </div>
+
+        <div class="election-info-card">
+          <h3>政党及国会状态</h3>
+          <p>后续可接入国会官方席位资料。当前不显示未经核实的数字。</p>
+        </div>
+      </div>
+    `;
+  }
+
+  $("election-detail").innerHTML=`
+    <div class="panel">
+      <div class="election-country-label">
+        <span class="flag">${config.flag}</span>
+
+        <div>
+          <h2>${esc(config.name)}</h2>
+          <p>${esc(config.subtitle)}</p>
+        </div>
+      </div>
+
+      ${country==="my"?electionTypeButtons():""}
+
+      <div class="election-section-title">
+        <h2>选举进度</h2>
+        <span>Election Progress</span>
+      </div>
+
+      ${progressContent}
+    </div>
+
+    <div class="panel">
+      <div class="election-section-title">
+        <h2>选举成绩</h2>
+        <span>Election Results</span>
+      </div>
+
+      <div class="election-info-grid">
+        <div class="election-info-card">
+          <h3>官方选举成绩</h3>
+          <p>候选人胜负、政党席位、投票率及最终结果，以官方机构公布为准。</p>
+          ${electionOfficialLinks(config)}
+        </div>
+
+        <div class="election-info-card">
+          <h3>历届选举资料</h3>
+          <p>可通过官方资料入口查看历史选举成绩。此处暂不将新闻报道数量当作选举结果。</p>
+          <div class="election-status official">官方数据优先</div>
+        </div>
+      </div>
+    </div>
+
+    ${electionMapMarkup(country)}
+
+    <div class="panel">
+      <div class="election-section-title">
+        <h2>新闻来源追踪报告</h2>
+        <span>Media Coverage Report</span>
+      </div>
+
+      <p class="muted">
+        根据现有 news.json 中与该地区选举相关的新闻进行统计。
+        报道数量不代表选举结果，也不代表所有媒体均已被完整抓取。
+      </p>
+
+      <div class="election-news-report">
+        <div class="election-stat">
+          <strong>${news.length}</strong>
+          <span>相关报道数量</span>
+        </div>
+
+        <div class="election-stat">
+          <strong>${totalSources}</strong>
+          <span>有报道的媒体数量</span>
+        </div>
+
+        <div class="election-stat">
+          <strong>${config.sourceNames.length}</strong>
+          <span>追踪名单媒体数量</span>
+        </div>
+      </div>
+
+      <div class="election-source-group">
+        <strong>指定媒体追踪</strong>
+        <div class="election-source-tags">${sourceGroups}</div>
+      </div>
+
+      ${additionalGroups?`
+        <div class="election-source-group">
+          <strong>其他已收集来源</strong>
+          <div class="election-source-tags">${additionalGroups}</div>
+        </div>
+      `:""}
+
+      <div class="election-source-group">
+        <strong>相关报道列表</strong>
+
+        <div class="election-report-list">
+          ${
+            news.length
+              ?news.slice(0,40).map(article).join("")
+              :'<div class="election-empty">目前 news.json 中没有找到该地区的选举相关新闻。请检查媒体抓取及新闻分类。</div>'
+          }
+        </div>
+      </div>
+
+      <div class="election-note">
+        统计依据：现有新闻数据的来源国家、标题及摘要关键词。
+        当前选举类型筛选仅根据新闻标题及摘要中的 PRU、PRN、PRK 等关键词判断，
+        可能遗漏未标明选举类型的报道。新闻内容仍需回到原始媒体及官方公告核实。
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="election-section-title">
+        <h2>官方信息来源</h2>
+        <span>Official Sources</span>
+      </div>
+
+      <p class="muted">优先查看选举主管机关公布的日期、投票安排及正式成绩。</p>
+
+      ${electionOfficialLinks(config)}
+    </div>
+  `;
+
+  if(country==="my"){
+    document.querySelectorAll("[data-election-type]").forEach(b=>{
+      b.onclick=()=>{
+        electionType=b.dataset.electionType;
+        renderElectionDetail("my");
+      };
+    });
+  }
+
+  initElectionMap(country);
+}
+
+function setElectionMode(mode){
+  electionMode=mode;
+
+  $("election-domestic-tab").classList.toggle("active",mode==="domestic");
+  $("election-international-tab").classList.toggle("active",mode==="international");
+
+  $("election-domestic-area").classList.toggle("hidden",mode!=="domestic");
+  $("election-international-area").classList.toggle("hidden",mode!=="international");
+
+  if(mode==="domestic"){
+    selectElectionCountry("my");
+  }else{
+    $("election-detail").innerHTML=
+      '<div class="panel"><div class="election-empty">请选择新加坡、台湾或美国，查看该地区的选举资料。</div></div>';
+
+    document.querySelectorAll("[data-election-country]").forEach(b=>
+      b.classList.remove("active")
+    );
+  }
+}
+
+function selectElectionCountry(country){
+  electionCountry=country;
+
+  document.querySelectorAll("[data-election-country]").forEach(b=>
+    b.classList.toggle("active",b.dataset.electionCountry===country)
+  );
+
+  renderElectionDetail(country);
+}
+
+/* 页面导航 */
+function showPage(p){
+  const target=$("page-"+p);
+  if(!target)return;
+
+  document.querySelectorAll("main section").forEach(s=>
+    s.classList.add("hidden")
+  );
+
+  target.classList.remove("hidden");
+
+  document.querySelectorAll("nav button").forEach(b=>
+    b.classList.toggle("active",b.dataset.page===p)
+  );
+
+  if(p==="election"){
+    if(electionMode==="domestic"){
+      selectElectionCountry("my");
+    }else if(electionCountry){
+      renderElectionDetail(electionCountry);
+    }
+  }
+
+  if(p==="international")renderInternational();
+  if(p==="compare")renderCompare();
+  if(p==="sources")renderSources();
 
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-/* ==========================================
-   FETCH NEWS DATA
-========================================== */
+/* 新闻数据读取 */
+async function load(){
+  const status=$("status");
+  status.textContent="正在读取新闻数据……";
 
-async function load() {
-  const status = $("status");
+  try{
+    const response=await fetch("./news.json?ts="+Date.now(),{
+      method:"GET",
+      cache:"no-store"
+    });
 
-  status.textContent = "正在读取新闻数据……";
-
-  try {
-    const response = await fetch(
-      "./news.json?ts=" + Date.now(),
-      {
-        method: "GET",
-        cache: "no-store"
-      }
-    );
-
-    if(!response.ok) {
-      throw new Error("HTTP " + response.status);
+    if(!response.ok){
+      throw new Error("HTTP "+response.status);
     }
 
-    const data = await response.json();
+    const data=await response.json();
 
-    // 支持数组及对象格式
-    items = Array.isArray(data)
-      ? data
-      : (Array.isArray(data.items) ? data.items : []);
+    items=Array.isArray(data)
+      ?data
+      :(Array.isArray(data.items)?data.items:[]);
 
-    // 按发布时间排序
-    items.sort((a,b) =>
-      dateValue(b.t || b.published) -
-      dateValue(a.t || a.published)
+    items.sort((a,b)=>
+      dateValue(b.t||b.published)-dateValue(a.t||a.published)
     );
 
-    status.textContent =
-      `已载入 ${items.length} 篇新闻 · 更新：${
-        data.updated_at || data.updated || "未知"
-      }`;
+    status.textContent=
+      `已载入 ${items.length} 篇新闻 · 更新：${data.updated_at||data.updated||"未知"}`;
 
-  } catch(error) {
-    items = [];
+  }catch(error){
+    items=[];
 
     console.error("Fetch 新闻失败：",error);
 
-    status.textContent =
-      "无法读取 news.json：" + error.message +
-      "。请检查文件或新闻更新程序。";
+    status.textContent=
+      "无法读取 news.json："+error.message+"。请检查文件或新闻更新程序。";
   }
 
-  // 更新所有页面
   renderHome();
   renderList("all-domestic-list",domestic());
   renderList("all-international-list",international());
@@ -991,15 +3399,25 @@ async function load() {
   renderInternational();
   renderCompare();
   renderSources();
+
+  if(!$("page-election").classList.contains("hidden")){
+    renderElectionDetail(electionCountry);
+  }
 }
 
-/* EVENTS */
-
-document.querySelectorAll("nav button").forEach(b => {
-  b.onclick = () => showPage(b.dataset.page);
+/* 事件监听 */
+document.querySelectorAll("nav button").forEach(b=>{
+  b.onclick=()=>showPage(b.dataset.page);
 });
 
-$("search").addEventListener("input",() => {
+/* 导览卡片跳转 */
+document.querySelectorAll("[data-guide-page]").forEach(b=>{
+  b.addEventListener("click",()=>{
+    showPage(b.dataset.guidePage);
+  });
+});
+
+$("search").addEventListener("input",()=>{
   renderHome();
   renderList("all-domestic-list",domestic());
   renderList("all-international-list",international());
@@ -1007,9 +3425,13 @@ $("search").addEventListener("input",() => {
   renderInternational();
   renderCompare();
   renderSources();
+
+  if(!$("page-election").classList.contains("hidden")){
+    renderElectionDetail(electionCountry);
+  }
 });
 
-$("sort").addEventListener("change",() => {
+$("sort").addEventListener("change",()=>{
   renderHome();
   renderList("all-domestic-list",domestic());
   renderList("all-international-list",international());
@@ -1018,28 +3440,32 @@ $("sort").addEventListener("change",() => {
   renderCompare();
 });
 
-$("reload").onclick = load;
+$("reload").onclick=load;
 
-["compare-query","compare-country","compare-language"].forEach(id => {
-  const control = $(id);
+["compare-query","compare-country","compare-language"].forEach(id=>{
+  const control=$(id);
 
-  if(control) {
-    control.addEventListener("input",renderCompare);
-  }
+  if(control)control.addEventListener("input",renderCompare);
 
-  if(control && control.tagName === "SELECT") {
+  if(control&&control.tagName==="SELECT"){
     control.addEventListener("change",renderCompare);
   }
 });
 
-$("clear-countries").onclick = () => {
-  selectedCountries = [];
+$("clear-countries").onclick=()=>{
+  selectedCountries=[];
   renderInternational();
 };
 
-// 首次载入新闻
-load();
+$("election-domestic-tab").onclick=()=>setElectionMode("domestic");
 
+$("election-international-tab").onclick=()=>setElectionMode("international");
+
+document.querySelectorAll("[data-election-country]").forEach(b=>{
+  b.onclick=()=>selectElectionCountry(b.dataset.electionCountry);
+});
+
+load();
 </script>
 </body>
 </html>

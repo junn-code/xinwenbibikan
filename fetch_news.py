@@ -11,363 +11,487 @@ from urllib.request import Request, urlopen
 from urllib.parse import urlsplit, urlunsplit, quote
 
 
-# ==================================================
-# 新闻来源
-# ==================================================
+# ==========================================================
+# NEWS COMPARE - 新闻抓取系统
+# Version 4.0
+# ==========================================================
+
+MAX_WORKERS = 10
+TIMEOUT = 25
+MAX_ARTICLES_PER_SOURCE = 200
+
+
+# ==========================================================
+# RSS 地址生成
+# ==========================================================
 
 def google_rss(query, language="zh-CN", country="MY"):
-    q = quote(query)
     return (
-        "https://news.google.com/rss/search?q=" + q
+        "https://news.google.com/rss/search?q="
+        + quote(query)
         + "&hl=" + language
         + "&gl=" + country
         + "&ceid=" + country + ":" + language
     )
 
 
+def feed(url, kind="official"):
+    return {
+        "url": url,
+        "kind": kind
+    }
+
+
+def google_source(name, query, language="zh-CN", country="MY"):
+    return {
+        "name": name,
+        "feeds": [
+            feed(
+                google_rss(query, language, country),
+                "google_news"
+            )
+        ],
+        "lang": "zh",
+        "country": "my"
+    }
+
+
+# ==========================================================
+# 新闻来源
+# ==========================================================
+
 SOURCES = [
 
-    # ==================================================
+    # ======================================================
     # MALAYSIA - ENGLISH
-    # ==================================================
+    # ======================================================
 
     {
         "name": "The Star",
-        "urls": ["https://www.thestar.com.my/rss/News"],
+        "feeds": [
+            feed("https://www.thestar.com.my/rss/News")
+        ],
         "lang": "en", "country": "my"
     },
     {
         "name": "New Straits Times",
-        "urls": ["https://www.nst.com.my/rss"],
+        "feeds": [
+            feed("https://www.nst.com.my/rss")
+        ],
         "lang": "en", "country": "my"
     },
     {
         "name": "Free Malaysia Today",
-        "urls": ["https://www.freemalaysiatoday.com/feed/"],
+        "feeds": [
+            feed("https://www.freemalaysiatoday.com/feed/")
+        ],
         "lang": "en", "country": "my"
     },
     {
         "name": "Malay Mail",
-        "urls": ["https://www.malaymail.com/feed/rss/malaysia"],
+        "feeds": [
+            feed("https://www.malaymail.com/feed/rss/malaysia")
+        ],
         "lang": "en", "country": "my"
     },
     {
         "name": "Bernama English",
-        "urls": ["https://www.bernama.com/en/rss.php"],
+        "feeds": [
+            feed("https://www.bernama.com/en/rssfeed.php/")
+        ],
         "lang": "en", "country": "my"
     },
 
-    # ==================================================
+    # ======================================================
     # MALAYSIA - BAHASA MELAYU
-    # ==================================================
+    # ======================================================
 
     {
         "name": "Berita Harian",
-        "urls": ["https://www.bharian.com.my/rss.xml"],
+        "feeds": [
+            feed("https://www.bharian.com.my/rss.xml")
+        ],
         "lang": "bm", "country": "my"
     },
     {
         "name": "Harian Metro",
-        "urls": ["https://www.hmetro.com.my/rss"],
+        "feeds": [
+            feed("https://www.hmetro.com.my/rss")
+        ],
         "lang": "bm", "country": "my"
     },
     {
         "name": "Utusan Malaysia",
-        "urls": ["https://www.utusan.com.my/feed/"],
+        "feeds": [
+            feed("https://www.utusan.com.my/feed/")
+        ],
         "lang": "bm", "country": "my"
     },
     {
         "name": "Sinar Harian",
-        "urls": ["https://www.sinarharian.com.my/rss"],
+        "feeds": [
+            feed("https://www.sinarharian.com.my/rss")
+        ],
         "lang": "bm", "country": "my"
     },
     {
         "name": "Bernama BM",
-        "urls": ["https://www.bernama.com/bm/rss.php"],
+        "feeds": [
+            feed("https://www.bernama.com/bm/rssfeed.php/")
+        ],
         "lang": "bm", "country": "my"
     },
 
-    # ==================================================
+    # ======================================================
     # MALAYSIA - CHINESE
-    # ==================================================
+    # ======================================================
 
+    # 星洲日报
     {
         "name": "星洲日报",
-        "urls": [
-            google_rss("site:sinchew.com.my", "zh-CN", "MY")
+        "feeds": [
+            feed(
+                "https://rsshub.app/sinchew/latest",
+                "third_party"
+            ),
+            feed(
+                google_rss(
+                    "site:sinchew.com.my",
+                    "zh-CN", "MY"
+                ),
+                "google_news"
+            )
         ],
-        "lang": "zh", "country": "my",
-        "require_chinese": True
-    },
-    {
-        "name": "中国报",
-        "urls": [
-            google_rss("site:chinapress.com.my", "zh-CN", "MY")
-        ],
-        "lang": "zh", "country": "my",
-        "require_chinese": True
-    },
-    {
-        "name": "南洋商报",
-        "urls": [
-            google_rss("site:enanyang.my", "zh-CN", "MY")
-        ],
-        "lang": "zh", "country": "my",
-        "require_chinese": True
-    },
-    {
-        "name": "东方日报",
-        "urls": [
-            google_rss("site:orientaldaily.com.my", "zh-CN", "MY")
-        ],
-        "lang": "zh", "country": "my",
-        "require_chinese": True
-    },
-    {
-        "name": "光华日报",
-        "urls": [
-            google_rss("site:kwongwah.com.my", "zh-CN", "MY")
-        ],
-        "lang": "zh", "country": "my",
-        "require_chinese": True
-    },
-    {
-        "name": "光明日报",
-        "urls": [
-            google_rss("site:guangming.com.my", "zh-CN", "MY")
-        ],
-        "lang": "zh", "country": "my",
+        "lang": "zh",
+        "country": "my",
         "require_chinese": True
     },
 
-    # ==================================================
+    # 中国报
+    google_source(
+        "Google News 搜索：中国报",
+        "site:chinapress.com.my",
+        "zh-CN", "MY"
+    ),
+
+    # 南洋商报
+    google_source(
+        "Google News 搜索：南洋商报",
+        "site:enanyang.my",
+        "zh-CN", "MY"
+    ),
+
+    # 东方日报
+    google_source(
+        "Google News 搜索：东方日报",
+        "site:orientaldaily.com.my",
+        "zh-CN", "MY"
+    ),
+
+    # 光华日报
+    google_source(
+        "Google News 搜索：光华日报",
+        "site:kwongwah.com.my",
+        "zh-CN", "MY"
+    ),
+
+    # 光明日报
+    google_source(
+        "Google News 搜索：光明日报",
+        "site:guangming.com.my",
+        "zh-CN", "MY"
+    ),
+
+    # 诗华日报
+    google_source(
+        "Google News 搜索：诗华日报",
+        "site:seehua.com.my",
+        "zh-CN", "MY"
+    ),
+
+    # BERNAMA 中文
+    # 暂时没有确认公开的中文 RSS，先用 Google News 搜索
+    google_source(
+        "Google News 搜索：BERNAMA 中文",
+        'site:bernama.com 中文 OR 华文 OR Mandarin',
+        "zh-CN", "MY"
+    ),
+
+    # ======================================================
     # MALAYSIA - TAMIL
-    # ==================================================
+    # ======================================================
 
     {
         "name": "Makkal Osai",
-        "urls": ["https://makkalosai.com.my/feed/"],
+        "feeds": [
+            feed("https://makkalosai.com.my/feed/")
+        ],
         "lang": "ta", "country": "my"
     },
 
-    # ==================================================
+    # ======================================================
     # SINGAPORE - CHINESE
-    # ==================================================
+    # ======================================================
 
     {
         "name": "联合早报",
-        "urls": [
-            "https://www.zaobao.com.sg/rss.xml",
-            google_rss("site:zaobao.com.sg", "zh-CN", "SG")
+        "feeds": [
+            feed("https://www.zaobao.com.sg/rss.xml"),
+            feed(
+                google_rss(
+                    "site:zaobao.com.sg",
+                    "zh-CN", "SG"
+                ),
+                "google_news"
+            )
         ],
-        "lang": "zh", "country": "singapore",
+        "lang": "zh",
+        "country": "singapore",
         "require_chinese": True
     },
     {
         "name": "8视界",
-        "urls": [
-            "https://www.8world.com/api/v1/rss-outbound-feed?_format=xml&category=176"
+        "feeds": [
+            feed(
+                "https://www.8world.com/api/v1/rss-outbound-feed?_format=xml&category=176"
+            )
         ],
-        "lang": "zh", "country": "singapore",
+        "lang": "zh",
+        "country": "singapore",
         "require_chinese": True
     },
 
-    # ==================================================
+    # ======================================================
     # SINGAPORE - ENGLISH
-    # ==================================================
+    # ======================================================
 
     {
         "name": "CNA Singapore",
-        "urls": [
-            "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=10416"
+        "feeds": [
+            feed(
+                "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=10416"
+            )
         ],
         "lang": "en", "country": "singapore"
     },
     {
         "name": "The Straits Times",
-        "urls": [
-            "https://www.straitstimes.com/news/singapore/rss.xml"
+        "feeds": [
+            feed(
+                "https://www.straitstimes.com/news/singapore/rss.xml"
+            )
         ],
         "lang": "en", "country": "singapore"
     },
 
-    # ==================================================
+    # ======================================================
     # JAPAN - JAPANESE
-    # ==================================================
+    # ======================================================
 
     {
         "name": "NHK 日本放送协会",
-        "urls": [
-            "https://www.nhk.or.jp/rss/news/cat0.xml",
-            "https://www.nhk.or.jp/rss/news/cat1.xml"
+        "feeds": [
+            feed("https://www.nhk.or.jp/rss/news/cat0.xml"),
+            feed("https://www.nhk.or.jp/rss/news/cat1.xml")
         ],
-        "lang": "ja", "country": "japan",
+        "lang": "ja",
+        "country": "japan",
         "require_japanese": True
     },
     {
         "name": "朝日新闻",
-        "urls": [
-            "https://www.asahi.com/rss/asahi/newsheadlines.rdf"
+        "feeds": [
+            feed("https://www.asahi.com/rss/asahi/newsheadlines.rdf")
         ],
-        "lang": "ja", "country": "japan",
+        "lang": "ja",
+        "country": "japan",
         "require_japanese": True
     },
 
+    # ======================================================
     # JAPAN - ENGLISH
+    # ======================================================
 
     {
         "name": "The Japan Times",
-        "urls": ["https://www.japantimes.co.jp/feed/"],
+        "feeds": [
+            feed("https://www.japantimes.co.jp/feed/")
+        ],
         "lang": "en", "country": "japan"
     },
     {
         "name": "NHK World",
-        "urls": [
-            "https://www3.nhk.or.jp/nhkworld/en/news/feeds/"
+        "feeds": [
+            feed("https://www3.nhk.or.jp/nhkworld/en/news/feeds/")
         ],
         "lang": "en", "country": "japan"
     },
 
-    # ==================================================
+    # ======================================================
     # SOUTH KOREA - KOREAN
-    # ==================================================
+    # ======================================================
 
     {
         "name": "韩联社",
-        "urls": [
-            "https://www.yna.co.kr/rss/news.xml",
-            "https://www.yna.co.kr/rss/international.xml",
-            "https://www.yna.co.kr/rss/economy.xml"
+        "feeds": [
+            feed("https://www.yna.co.kr/rss/news.xml"),
+            feed("https://www.yna.co.kr/rss/international.xml"),
+            feed("https://www.yna.co.kr/rss/economy.xml")
         ],
-        "lang": "ko", "country": "korea",
+        "lang": "ko",
+        "country": "korea",
         "require_korean": True
     },
 
+    # ======================================================
     # SOUTH KOREA - ENGLISH
+    # ======================================================
 
     {
         "name": "Yonhap English",
-        "urls": ["https://en.yna.co.kr/RSS/news.xml"],
+        "feeds": [
+            feed("https://en.yna.co.kr/RSS/news.xml")
+        ],
         "lang": "en", "country": "korea"
     },
     {
         "name": "Korea Herald",
-        "urls": ["https://www.koreaherald.com/rss/koreaherald.xml"],
+        "feeds": [
+            feed("https://www.koreaherald.com/rss/koreaherald.xml")
+        ],
         "lang": "en", "country": "korea"
     },
 
-    # ==================================================
+    # ======================================================
     # CHINA - SIMPLIFIED CHINESE
-    # ==================================================
+    # ======================================================
 
     {
         "name": "中国新闻网",
-        "urls": [
-            "https://www.chinanews.com.cn/rss/scroll-news.xml",
-            "https://www.chinanews.com.cn/rss/china.xml",
-            google_rss("site:chinanews.com.cn", "zh-CN", "CN")
+        "feeds": [
+            feed("https://www.chinanews.com.cn/rss/scroll-news.xml"),
+            feed("https://www.chinanews.com.cn/rss/china.xml"),
+            feed(
+                google_rss(
+                    "site:chinanews.com.cn",
+                    "zh-CN", "CN"
+                ),
+                "google_news"
+            )
         ],
         "lang": "zh", "country": "china"
     },
-    {
-        "name": "人民网",
-        "urls": [
-            google_rss("site:people.com.cn", "zh-CN", "CN")
-        ],
-        "lang": "zh", "country": "china"
-    },
-    {
-        "name": "新华网",
-        "urls": [
-            google_rss("site:news.cn", "zh-CN", "CN")
-        ],
-        "lang": "zh", "country": "china"
-    },
+    google_source(
+        "Google News 搜索：人民网",
+        "site:people.com.cn",
+        "zh-CN", "CN"
+    ),
+    google_source(
+        "Google News 搜索：新华网",
+        "site:news.cn",
+        "zh-CN", "CN"
+    ),
 
-    # ==================================================
+    # ======================================================
     # TAIWAN - TRADITIONAL CHINESE
-    # ==================================================
+    # ======================================================
 
     {
         "name": "中央社",
-        "urls": [
-            "https://feeds.feedburner.com/rsscna/politics",
-            "https://feeds.feedburner.com/rsscna/intworld",
-            "https://feeds.feedburner.com/rsscna/finance",
-            google_rss("site:cna.com.tw", "zh-TW", "TW")
+        "feeds": [
+            feed("https://feeds.feedburner.com/rsscna/politics"),
+            feed("https://feeds.feedburner.com/rsscna/intworld"),
+            feed("https://feeds.feedburner.com/rsscna/finance"),
+            feed(
+                google_rss(
+                    "site:cna.com.tw",
+                    "zh-TW", "TW"
+                ),
+                "google_news"
+            )
         ],
         "lang": "zh", "country": "taiwan"
     },
     {
         "name": "自由时报",
-        "urls": [
-            "https://news.ltn.com.tw/rss/all.xml",
-            google_rss("site:ltn.com.tw", "zh-TW", "TW")
+        "feeds": [
+            feed("https://news.ltn.com.tw/rss/all.xml"),
+            feed(
+                google_rss(
+                    "site:ltn.com.tw",
+                    "zh-TW", "TW"
+                ),
+                "google_news"
+            )
         ],
         "lang": "zh", "country": "taiwan"
     },
-    {
-        "name": "联合新闻网",
-        "urls": [
-            google_rss("site:udn.com", "zh-TW", "TW")
-        ],
-        "lang": "zh", "country": "taiwan"
-    },
-    {
-        "name": "TVBS新闻网",
-        "urls": [
-            google_rss("site:news.tvbs.com.tw", "zh-TW", "TW")
-        ],
-        "lang": "zh", "country": "taiwan"
-    },
+    google_source(
+        "Google News 搜索：联合新闻网",
+        "site:udn.com",
+        "zh-TW", "TW"
+    ),
+    google_source(
+        "Google News 搜索：TVBS新闻网",
+        "site:news.tvbs.com.tw",
+        "zh-TW", "TW"
+    ),
 
-    # ==================================================
+    # ======================================================
     # USA
-    # ==================================================
+    # ======================================================
 
     {
         "name": "NPR",
-        "urls": ["https://feeds.npr.org/1001/rss.xml"],
+        "feeds": [
+            feed("https://feeds.npr.org/1001/rss.xml")
+        ],
         "lang": "en", "country": "usa"
     },
 
-    # ==================================================
+    # ======================================================
     # UK
-    # ==================================================
+    # ======================================================
 
     {
         "name": "BBC News",
-        "urls": ["https://feeds.bbci.co.uk/news/world/rss.xml"],
+        "feeds": [
+            feed("https://feeds.bbci.co.uk/news/world/rss.xml")
+        ],
         "lang": "en", "country": "uk"
     },
     {
         "name": "The Guardian",
-        "urls": ["https://www.theguardian.com/world/rss"],
+        "feeds": [
+            feed("https://www.theguardian.com/world/rss")
+        ],
         "lang": "en", "country": "uk"
     },
 
-    # ==================================================
+    # ======================================================
     # EUROPEAN UNION
-    # ==================================================
+    # ======================================================
 
     {
         "name": "Euronews",
-        "urls": [
-            "https://www.euronews.com/rss?level=theme&name=news"
+        "feeds": [
+            feed("https://www.euronews.com/rss?level=theme&name=news")
         ],
         "lang": "en", "country": "eu"
     },
     {
         "name": "Politico Europe",
-        "urls": ["https://www.politico.eu/feed/"],
+        "feeds": [
+            feed("https://www.politico.eu/feed/")
+        ],
         "lang": "en", "country": "eu"
     }
 ]
 
 
-# ==================================================
+# ==========================================================
 # 文字处理
-# ==================================================
+# ==========================================================
 
 def local_name(tag):
     return tag.split("}")[-1].lower()
@@ -461,9 +585,25 @@ def get_link(entry):
     return ""
 
 
-# ==================================================
+def get_actual_publisher(entry):
+    for child in entry.iter():
+        if local_name(child.tag) == "source":
+            name = (
+                child.attrib.get("title")
+                or "".join(child.itertext())
+            )
+
+            name = clean_text(name)
+
+            if name:
+                return name
+
+    return ""
+
+
+# ==========================================================
 # 语言检查
-# ==================================================
+# ==========================================================
 
 def contains_chinese_title(text):
     han_count = sum(
@@ -482,7 +622,7 @@ def contains_chinese_title(text):
     return (
         han_count >= 2
         and meaningful_count > 0
-        and han_count / meaningful_count >= 0.25
+        and han_count / meaningful_count >= 0.20
     )
 
 
@@ -511,11 +651,12 @@ def check_language(title, source):
     return True
 
 
-# ==================================================
+# ==========================================================
 # RSS 解析
-# ==================================================
+# ==========================================================
 
-def parse_feed(raw_data, source):
+def parse_feed(raw_data, source, feed_info):
+
     root = ET.fromstring(raw_data)
 
     entries = []
@@ -540,7 +681,6 @@ def parse_feed(raw_data, source):
         if not link.startswith(("http://", "https://")):
             continue
 
-        # 过滤错误语言标题
         if not check_language(title, source):
             continue
 
@@ -566,36 +706,53 @@ def parse_feed(raw_data, source):
             }
         )
 
+        actual_publisher = get_actual_publisher(entry)
+
+        # Google News 必须尽量识别实际媒体
+        if feed_info["kind"] == "google_news":
+            publisher = actual_publisher or "Google News"
+        else:
+            publisher = actual_publisher or source["name"]
+
         results.append({
             "h": title,
             "u": link,
-            "o": source["name"],
+            "o": publisher,
             "t": normalize_date(published),
             "l": source["lang"],
             "country": source["country"],
-            "summary": summary[:700]
+            "summary": summary[:700],
+            "source_type": feed_info["kind"],
+            "source_group": source["name"]
         })
 
     return results
 
 
-# ==================================================
+# ==========================================================
 # 抓取单一来源
-# ==================================================
+# ==========================================================
 
 def fetch_source(source):
+
     print("\n正在抓取：", source["name"])
 
     all_results = []
     errors = []
+    success_feeds = 0
 
-    for feed_url in source["urls"]:
+    for feed_info in source["feeds"]:
+
+        feed_url = feed_info["url"]
 
         try:
             request = Request(
                 feed_url,
                 headers={
-                    "User-Agent": "Mozilla/5.0 NewsCompare/3.0",
+                    "User-Agent": (
+                        "Mozilla/5.0 "
+                        "(compatible; NewsCompare/4.0)"
+                    ),
                     "Accept": (
                         "application/rss+xml, "
                         "application/atom+xml, "
@@ -605,9 +762,12 @@ def fetch_source(source):
                 }
             )
 
-            with urlopen(request, timeout=25) as response:
+            with urlopen(request, timeout=TIMEOUT) as response:
                 raw_data = response.read()
                 status = response.status
+                content_type = response.headers.get(
+                    "Content-Type", ""
+                )
 
             if not raw_data:
                 raise ValueError("服务器返回空内容")
@@ -618,24 +778,35 @@ def fetch_source(source):
                 preview.startswith(b"<!doctype html")
                 or preview.startswith(b"<html")
             ):
-                raise ValueError("服务器返回 HTML，不是 RSS XML")
+                raise ValueError(
+                    "服务器返回 HTML，不是 RSS XML"
+                )
 
-            results = parse_feed(raw_data, source)
+            results = parse_feed(
+                raw_data,
+                source,
+                feed_info
+            )
 
             if not results:
-                raise ValueError("RSS 没有符合条件的新闻")
+                raise ValueError(
+                    "没有符合条件的新闻"
+                )
 
             all_results.extend(results)
+            success_feeds += 1
 
             print(
                 "[成功]",
                 source["name"],
                 len(results),
-                "篇 | HTTP:",
-                status
+                "篇",
+                "| 类型:", feed_info["kind"],
+                "| HTTP:", status
             )
 
         except Exception as error:
+
             errors.append(
                 feed_url + " -> " + str(error)
             )
@@ -643,6 +814,7 @@ def fetch_source(source):
             print(
                 "[失败]",
                 source["name"],
+                "|",
                 str(error)
             )
 
@@ -651,12 +823,19 @@ def fetch_source(source):
             "；".join(errors) or "没有取得新闻"
         )
 
-    return all_results
+    # 单一来源限制数量
+    all_results = all_results[:MAX_ARTICLES_PER_SOURCE]
+
+    return {
+        "items": all_results,
+        "success_feeds": success_feeds,
+        "errors": errors
+    }
 
 
-# ==================================================
+# ==========================================================
 # 新闻去重
-# ==================================================
+# ==========================================================
 
 def normalize_url(url):
     try:
@@ -674,9 +853,9 @@ def normalize_url(url):
         return url
 
 
-# ==================================================
+# ==========================================================
 # 主程序
-# ==================================================
+# ==========================================================
 
 def main():
 
@@ -685,13 +864,15 @@ def main():
     failed_sources = []
 
     print("\n===================================")
-    print("       NEWS COMPARE")
+    print("       NEWS COMPARE V4.0")
     print("       新闻抓取系统")
     print("===================================")
 
     print("\n新闻来源总数：", len(SOURCES))
 
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    with ThreadPoolExecutor(
+        max_workers=MAX_WORKERS
+    ) as executor:
 
         futures = {
             executor.submit(fetch_source, source): source
@@ -705,11 +886,14 @@ def main():
             try:
                 result = future.result()
 
-                all_news.extend(result)
+                all_news.extend(result["items"])
 
                 success_sources.append({
                     "source": source["name"],
-                    "count": len(result)
+                    "count": len(result["items"]),
+                    "feeds_ok": result["success_feeds"],
+                    "status": "success",
+                    "errors": result["errors"]
                 })
 
             except Exception as error:
@@ -725,7 +909,10 @@ def main():
                     error
                 )
 
+    # ======================================================
     # 去重
+    # ======================================================
+
     seen = set()
     unique_news = []
 
@@ -739,20 +926,31 @@ def main():
         seen.add(url)
         unique_news.append(item)
 
-    # 按发布时间排序
+    # ======================================================
+    # 排序
+    # ======================================================
+
     unique_news.sort(
         key=lambda item: item["t"],
         reverse=True
     )
 
+    # ======================================================
     # 输出 JSON
+    # ======================================================
+
     output = {
-        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+
         "items": unique_news,
+
         "sources_ok": sorted(
             success_sources,
             key=lambda x: x["source"]
         ),
+
         "sources_failed": sorted(
             failed_sources,
             key=lambda x: x["source"]
@@ -772,9 +970,9 @@ def main():
             indent=2
         )
 
-    # ==================================================
-    # 统计结果
-    # ==================================================
+    # ======================================================
+    # 统计
+    # ======================================================
 
     print("\n===================================")
     print("新闻抓取完成")
@@ -808,16 +1006,46 @@ def main():
 
         print(country, ":", count, "篇")
 
-    print("\n中文新闻检查：")
+    # ======================================================
+    # 中文新闻统计
+    # ======================================================
+
+    print("\n马来西亚中文新闻统计：")
+
+    chinese_sources = {}
 
     for item in unique_news:
 
-        if item["l"] == "zh":
+        if (
+            item["l"] == "zh"
+            and item["country"] == "my"
+        ):
+
+            name = item["source_group"]
+
+            chinese_sources[name] = (
+                chinese_sources.get(name, 0) + 1
+            )
+
+    for name, count in sorted(
+        chinese_sources.items()
+    ):
+
+        print(name, ":", count, "篇")
+
+    print("\n中文新闻标题：")
+
+    for item in unique_news:
+
+        if (
+            item["l"] == "zh"
+            and item["country"] == "my"
+        ):
 
             print(
-                item["country"],
-                "|",
                 item["o"],
+                "|",
+                item["source_type"],
                 "|",
                 item["h"]
             )
