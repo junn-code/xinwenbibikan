@@ -1373,6 +1373,21 @@ footer{
   .monarch-portrait-frame iframe{height:430px}
   .guide-grid{grid-template-columns:1fr}
 }
+
+/* Southern Daily special coverage */
+.sd-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) minmax(180px,260px) auto;gap:10px;align-items:center;margin:22px 0}
+.sd-toolbar input,.sd-toolbar select{width:100%;min-width:0;border:1px solid var(--line,rgba(120,120,120,.2));border-radius:14px;padding:13px 15px;background:rgba(255,255,255,.72);color:inherit;font:inherit;outline:none}
+.sd-articles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.sd-article{border:1px solid rgba(120,120,120,.16);border-radius:20px;padding:20px;background:rgba(255,255,255,.48);min-width:0}
+.sd-article .sd-kicker{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--gray);font-size:11px;margin-bottom:10px}
+.sd-article h3{font-size:18px;line-height:1.45;margin:0 0 9px}
+.sd-article .sd-deck{font-weight:600;line-height:1.7;margin-bottom:10px}
+.sd-article p{font-size:13px;line-height:1.85;color:var(--gray);white-space:pre-line;margin:0 0 12px}
+.sd-article details{border-top:1px solid rgba(120,120,120,.16);padding-top:10px;font-size:12px;color:var(--gray)}
+.sd-article summary{cursor:pointer;font-weight:650;color:var(--text)}
+.sd-disclaimer{margin-top:18px}
+@media(max-width:760px){.sd-toolbar{grid-template-columns:1fr}.sd-articles{grid-template-columns:1fr}.sd-article{padding:17px}}
+
 </style>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -1390,6 +1405,7 @@ footer{
 
   <nav id="nav">
     <button data-page="home" class="active">首页</button>
+    <button data-page="malaya">南方日报</button>
     <button data-page="all">总览新闻</button>
     <button data-page="domestic">国内新闻</button>
     <button data-page="international">国际新闻</button>
@@ -1436,6 +1452,47 @@ footer{
   <div class="panel">
     <h2>最新新闻总览</h2>
     <div id="home-latest" class="scrollable-news"></div>
+  </div>
+</section>
+
+<!-- 南方日报：新增独立新闻栏目，原有页面与功能保持不变 -->
+<section id="page-malaya" class="hidden">
+  <div class="hero">
+    <div class="eyebrow">SOUTHERN DAILY · INDEPENDENT NEWS</div>
+    <h1>南方日报</h1>
+    <p>立足马来西亚，关注公共事务、社会发展与国际局势。</p>
+    <div class="hero-note">独立 · 专业 · 公共利益</div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">EDITORIAL MISSION</div>
+    <h2>让事实成为报道的起点</h2>
+    <p class="muted">
+      南方日报是本平台新增的新闻栏目，与「新闻比比看！」现有的新闻汇总、
+      媒体比较、媒体目录及选举功能分开呈现。现有栏目和新闻数据不会因本次新增而更改。
+    </p>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">SPECIAL COVERAGE · JOHOR</div>
+    <h2>柔佛州 2027 年财政预算案</h2>
+    <p class="muted">
+      专题报道将以《柔佛州 2027 年财政预算案》原始文件为主要依据，
+      分析财政安排、经济发展、民生措施、公共服务、基础设施及其他政策内容。
+      报道会区分预算拨款、政策承诺、计划目标与已经落实的项目。
+    </p>
+    <div class="country-actions">
+      <span class="pill">预算案专题</span>
+      <span class="pill">文件依据报道</span>
+      <span class="pill">持续整理中</span>
+    </div>
+    <div class="sd-toolbar">
+      <input id="sd-search" type="search" placeholder="搜索新闻标题、内容或关键词……" aria-label="搜索南方日报专题新闻">
+      <select id="sd-category" aria-label="按主题筛选"><option value="all">全部主题</option></select>
+      <span class="pill" id="sd-count">50 篇报道</span>
+    </div>
+    <div id="sd-articles" class="sd-articles"></div>
+    <p class="muted sd-disclaimer">编辑说明：本专题50篇报道均依据《TEKS UCAPAN PEMBENTANGAN BELANJAWAN JOHOR 2027》（2026年11月19日）编写。文中金额与受惠人数为预算案所列安排或目标，不代表款项已全数发放、工程已完成或目标已达成。来源标注采用文件印刷页码及段落编号。</p>
   </div>
 </section>
 
@@ -3325,6 +3382,426 @@ function selectElectionCountry(country){
   renderElectionDetail(country);
 }
 
+const SOUTHERN_ARTICLES = [
+  {
+    "n": 1,
+    "title": "财政总览",
+    "deck": "2027年柔佛州预算案预计收入RM30.77亿，支出RM30.75亿，录得RM232.8万盈余。",
+    "body": "柔佛州2027年财政预算案预计州收入为RM3,076,857,000，整体开支为RM3,074,529,000，预算差额为RM2,328,000。文件以“Johor Maju, Rakyat Sejahtera”为主题，列出六大支柱及284项承诺。\n\n上述数字属于预算案的年度预测，并非年终审计结果。预算案同时强调，发展开支将成为推动州内基础设施和经济发展的重要部分。",
+    "category": "财政框架",
+    "source": "第7至8页；第23至26段"
+  },
+  {
+    "n": 2,
+    "title": "发展开支",
+    "deck": "柔佛2027年发展开支估计达RM15.3亿，占预算近一半。",
+    "body": "预算案指出，2027年发展开支估计为RM1.53 billion，占整体预算约49.77%。文件比较称，发展开支从2023年的RM600 million、占34.6%，逐步增加至2027年的水平。\n\n这项安排反映州政府把较大比重资源放在发展项目上。预算文件没有在这段说明每个项目的实际完工时间，具体落实进度仍须按项目逐项追踪。",
+    "category": "财政框架",
+    "source": "第8页；第25段"
+  },
+  {
+    "n": 3,
+    "title": "投资推广",
+    "deck": "Invest Johor获RM450万拨款，负责加强州内投资推广与便利化。",
+    "body": "预算案列出RM4.5 million，用于强化Invest Johor作为州级投资推广及投资便利化主导机构的角色。有关安排属于经济发展支柱下的投资与区域合作项目。\n\n同一部分也提出Johor Global Investment Quest、Made in Johor推广及投资品牌活动。预算案未在该段列出新增投资额目标，因此不能把拨款直接等同于已落实投资。",
+    "category": "经济发展",
+    "source": "第16页；第66段"
+  },
+  {
+    "n": 4,
+    "title": "区域投资",
+    "deck": "Johor Global Investment Quest获RM200万，瞄准优质投资与新市场。",
+    "body": "柔佛州政府在2027年预算案中为Johor Global Investment Quest安排RM2 million，目标是吸引优质投资、探索新市场，并巩固柔佛作为区域投资目的地的地位。\n\n该项目与Invest Johor强化、Made in Johor推广及投资品牌工作并列。文件说明了政策方向和拨款金额，但没有列明预计项目数或投资额。",
+    "category": "经济发展",
+    "source": "第16页；第67至70段"
+  },
+  {
+    "n": 5,
+    "title": "柔新人才研究",
+    "deck": "柔佛与新加坡拟共同进行人才技能差距研究，州方承担RM11万。",
+    "body": "预算案提出Johor–Singapore Talent & Skill Gap Study，整体估算成本为RM220,000，由柔佛与新加坡共同融资。柔佛州政府承诺承担RM110,000，即研究成本的一半，另一半由新加坡政府承担。\n\n研究方向聚焦两地人才与技能差距。预算案没有在相关段落公布研究结果或具体培训名单，因此这项措施目前应视为计划开展的研究。",
+    "category": "就业与技能",
+    "source": "第17页；第71段"
+  },
+  {
+    "n": 6,
+    "title": "TVET技能培训",
+    "deck": "PRO-MAHIR PLUS获RM400万，列入柔佛技能发展计划。",
+    "body": "柔佛州2027年预算案为Program Pembangunan Kemahiran Johor（PRO-MAHIR PLUS）安排RM4 million，属于加强劳动力技能与就业竞争力的措施。\n\n同一组承诺还包括JTDC Job Fair、TVET设备援助拨款及Industry-Ready Talent项目。预算案没有在该段交代课程领域、招生人数或就业率目标，相关细节仍有待执行单位公布。",
+    "category": "就业与技能",
+    "source": "第17页；第72至76段"
+  },
+  {
+    "n": 7,
+    "title": "柔佛旅游年延长",
+    "deck": "Visit Johor延长至2027年12月31日，旅游推广将继续推进。",
+    "body": "预算案宣布，Tahun Melawat Johor将延长至2027年12月31日。州政府表示，将继续加强宣传、举办国际级活动并改善旅游设施，以延续旅游活动对地方经济和商家的带动作用。\n\n2027年旅游宣传与推广项目获RM1.3 million。延长活动期限是政策安排，实际访客人数、旅游收入及地方商家受益情况，仍须以之后公布的数据评估。",
+    "category": "旅游",
+    "source": "第18页；第77至79段"
+  },
+  {
+    "n": 8,
+    "title": "旅游景点升级",
+    "deck": "柔佛为标志性旅游景点转型安排RM740万。",
+    "body": "预算案为Johor标志性旅游景点转型安排RM7.4 million，列举地点包括麻坡Parit Kasim红树林公园、峇株巴辖Minyak Beku海滩，以及昔加末Labis温泉。\n\n这笔拨款属于旅游产品与设施提升承诺。文件没有逐个地点说明工程范围、施工期限或开放安排，因此现阶段不宜将其描述为工程已经完成。",
+    "category": "旅游",
+    "source": "第19页；第82段"
+  },
+  {
+    "n": 9,
+    "title": "动物园第三阶段",
+    "deck": "柔佛动物园第三阶段设施提升获RM300万拨款。",
+    "body": "柔佛州2027年预算案为Zoo Johor第三阶段设施与便利设施提升安排RM3 million。该项目被纳入州政府发展旅游设施的承诺之中。\n\n预算案没有在该段列出第三阶段的具体施工项目、动物设施清单或完工日期。拨款公布代表预算规划，不等于相关工程已经交付使用。",
+    "category": "旅游",
+    "source": "第19页；第83段"
+  },
+  {
+    "n": 10,
+    "title": "粮食安全",
+    "deck": "柔佛拨款RM300万发展州内非稻田区稻米产业。",
+    "body": "预算案列出RM3 million，用于发展柔佛州非传统稻田区的稻米产业（Industri Sawah Padi Luar Jelapang）。该项目列在粮食供应保障板块。\n\n预算案同时安排农业食品作物产业、智慧农业及青年农业企业家等计划。原文没有在这段提供新增耕作面积、产量或参与农户数，相关成效需要后续资料验证。",
+    "category": "农业与粮食",
+    "source": "第20页；第91段"
+  },
+  {
+    "n": 11,
+    "title": "智慧农业",
+    "deck": "智慧农业计划获RM250万，列入粮食供应保障措施。",
+    "body": "柔佛州2027年预算案为Program Memperkasa Pertanian Pintar安排RM2.5 million，目标是推动智慧农业发展。\n\n该项目与农业食品作物产业、Johor Future Agropreneur及农业基础产业发展计划共同列入粮食供应保障板块。预算案未在相关段落说明将采用哪些技术或覆盖哪些农场，具体执行内容仍待公布。",
+    "category": "农业与粮食",
+    "source": "第20页；第92至95段"
+  },
+  {
+    "n": 12,
+    "title": "微型企业融资",
+    "deck": "柔佛将增加RM1亿无息微型企业融资基金。",
+    "body": "柔佛州政府在预算案中表示，将通过与金融机构合作，为Skim Pembiayaan Mikro Usahawan Johor增加RM100 million无息融资资金，以扩大微型企业获得融资的机会。\n\n预算案说明，该措施旨在协助微型企业巩固营运并扩展业务。原文没有在该段列明贷款资格、每家企业可获金额、还款期限或申请开放日期，相关条件仍须等待执行机构公布。",
+    "category": "企业与融资",
+    "source": "第22页；第103段"
+  },
+  {
+    "n": 13,
+    "title": "Jualan Kasih扩点",
+    "deck": "Jualan Kasih Johor计划扩大至748个销售地点。",
+    "body": "预算案提出，Jualan Kasih Johor将在2027年把销售地点从336个增加至748个，并安排RM30 million拨款。文件提及，现有组合商品包括鸡肉一只、鸡蛋一板及食用油两公升，售价RM15。\n\n扩展地点是2027年的政策承诺，不能据此认为748个地点已经全面投入服务。具体地点、销售日期及供应安排仍须由负责单位公布。",
+    "category": "民生援助",
+    "source": "第24至25页；第118至119段"
+  },
+  {
+    "n": 14,
+    "title": "Bantuan Kasih Johor",
+    "deck": "BKJ第五及第六阶段预计从2026年12月与2027年2月展开。",
+    "body": "预算案宣布，Bantuan Kasih Johor（BKJ）第五及第六阶段将分别从2026年12月及2027年2月开始实施。文件称，州政府此前已执行四个阶段，并计划继续通过不同对象类别提供援助。\n\n这项安排是预算案公布的后续计划。各类别的资格、核实方式和实际发放时间，应以政府正式通知为准。",
+    "category": "民生援助",
+    "source": "第25至26页；第122至123段"
+  },
+  {
+    "n": 15,
+    "title": "弱势群体援助",
+    "deck": "BKJ为孤儿及残障人士分别列出每人RM500与RM200援助。",
+    "body": "预算案列出两项Bantuan Kasih Johor类别：孤儿每人RM500，预计惠及超过21,000人，拨款RM10.7 million；残障人士每人RM200，预计惠及超过61,000名受惠者，拨款RM12.2 million。\n\n这些金额与人数属于预算案所列援助安排及预计受惠规模。文件没有在该段完整列出申请流程，符合资格者仍需依正式执行说明办理。",
+    "category": "民生援助",
+    "source": "第26页；第124至125段"
+  },
+  {
+    "n": 16,
+    "title": "司机与配送员援助",
+    "deck": "注册德士、网召车及电召配送司机列入BKJ援助对象。",
+    "body": "预算案为已注册德士、网召车及电召配送（P-hailing）司机列出每人RM400援助，预计惠及超过45,000人，拨款RM18 million。\n\n此项援助属于BKJ按职业类别安排的支持措施。原文明确使用“已注册”作为对象描述，但未在该段列出注册平台范围、申请期限或审核程序，相关条件仍需官方进一步说明。",
+    "category": "民生援助",
+    "source": "第27页；第131段"
+  },
+  {
+    "n": 17,
+    "title": "大学生援助",
+    "deck": "柔佛学生援助覆盖大学生、中六及预科学生，预算RM2240万。",
+    "body": "预算案列出BKJ Mahasiswa Anak Johor援助，涵盖柔佛籍大学生、中六及预科学生，每人RM200，预计惠及112,000人，拨款RM22.4 million。\n\n该项目是预算案中规模较大的学生群体援助之一。文件没有在该段详列就读院校范围、申请证明及发放方式，相关安排仍需以正式指南为准。",
+    "category": "教育与青年",
+    "source": "第28页；第138段"
+  },
+  {
+    "n": 18,
+    "title": "生活援助月津贴",
+    "deck": "柔佛为超过2.6万贫困家庭及asnaf安排RM1.117亿每月生活援助。",
+    "body": "预算案列出Bantuan Sara Hidup Bulanan，面向超过26,000户贫困家庭及asnaf，拨款RM111.7 million。该项目属于社会援助与生活保障措施。\n\n预算案未在该段列出每户每月具体金额、发放期限或审核标准，因此不能把总拨款直接换算为每户可领取金额。有关细节仍需执行单位进一步公布。",
+    "category": "民生援助",
+    "source": "第30页；第149段"
+  },
+  {
+    "n": 19,
+    "title": "首购房援助",
+    "deck": "柔佛为首购房者提供RM5000援助，预算RM7500万。",
+    "body": "Perumahan Kasih Johor（PKJ）计划继续协助首次购屋者。预算案列出首购房援助每名受惠者RM5,000，预计惠及15,000人，拨款RM75 million。\n\n这项援助是住房支持措施之一，另有首次入住新屋、租金援助及租屋押金援助。文件未在该段列出房价门槛、家庭收入限制或申请窗口，需以正式政策细则为准。",
+    "category": "住房",
+    "source": "第31至32页；第161至163段"
+  },
+  {
+    "n": 20,
+    "title": "租房支援",
+    "deck": "PKJ租金与租屋押金援助合计安排RM3500万。",
+    "body": "预算案为PKJ租房援助列出每人RM2,500，预计10,000名受惠者，拨款RM25 million；另为租屋押金援助列出每人RM1,000，预计同样惠及10,000人，拨款RM10 million。\n\n两项安排合计RM35 million。预算案没有在该段说明租约期限、申请资格及付款方式，具体条件仍需主管机构公布。",
+    "category": "住房",
+    "source": "第32页；第164至165段"
+  },
+  {
+    "n": 21,
+    "title": "可负担房屋目标",
+    "deck": "柔佛与PKPJ及私人发展商合作，目标2027年提供11500个可负担房屋单位。",
+    "body": "预算案提出，州政府将通过PKPJ与私人发展商合作，目标在2027年提供11,500个Rumah Mampu Milik Johor单位。\n\n这是年度供应目标，并非预算案确认所有单位已建成或已开放申请。房屋地点、价格、申请条件及交付时间，仍须根据后续项目公告核实。",
+    "category": "住房",
+    "source": "第32页；第166段"
+  },
+  {
+    "n": 22,
+    "title": "诊所服务调整",
+    "deck": "柔佛拟扩大诊所服务分流安排至三家健康诊所，拨款RM500万。",
+    "body": "预算案列出将部分健康诊所服务迁移（decanting）的做法扩大至三家健康诊所，并安排RM5 million。\n\n该措施被列在柔佛人民健康与福祉板块。文件没有在该段公布涉及的三家诊所名称、迁移服务范围或实施日期，因此现阶段只能确认预算案提出了扩大计划。",
+    "category": "医疗与福利",
+    "source": "第33页；第172段"
+  },
+  {
+    "n": 23,
+    "title": "药物邮寄服务",
+    "deck": "柔佛拟把邮寄药物服务扩大至所有医院与健康诊所设施。",
+    "body": "预算案提出，将Perkhidmatan Ubat Melalui Pos扩大至所有医院及健康诊所设施，并安排RM3.8 million。\n\n该措施旨在扩大药物配送服务的覆盖范围。原文没有在该段说明具体配送资格、药物类别、合作服务商或覆盖时间表，服务细节仍须由卫生部门公布。",
+    "category": "医疗与福利",
+    "source": "第33页；第173段"
+  },
+  {
+    "n": 24,
+    "title": "医院轮候系统",
+    "deck": "Hospital Sultan Ismail将扩大智能排队系统，预算RM77万。",
+    "body": "柔佛州2027年预算案为扩大Hospital Sultan Ismail Johor Bahru的Sistem Giliran Pintar（SQS）安排RM770,000。\n\n项目列在医疗服务改善措施之中。预算案没有在该段说明系统扩展的具体部门、预计缩短的等候时间或启用日期，因此不能预先断言病人轮候时间将减少多少。",
+    "category": "医疗与福利",
+    "source": "第34页；第175段"
+  },
+  {
+    "n": 25,
+    "title": "救护车援助",
+    "deck": "Ambulans Maju Johor获RM330万拨款。",
+    "body": "预算案列出Sumbangan Ambulans Maju Johor，拨款RM3.3 million，纳入州政府健康与医疗支持项目。\n\n文件没有在该段交代救护车数量、接收机构、服务覆盖范围或采购时间。该金额应理解为预算安排，而非已完成交付的车辆数量。",
+    "category": "医疗与福利",
+    "source": "第34页；第177段"
+  },
+  {
+    "n": 26,
+    "title": "防洪管理",
+    "deck": "柔佛为地方政府防洪管理安排RM8910万。",
+    "body": "预算案在安全、清洁与环境可持续支柱下，为地方政府防洪管理安排RM89.1 million。另有河流、沟渠与蓄洪池维护，以及易淹水热点排水工程等项目。\n\n预算案将防灾与减灾列为重要方向，但未在此段逐项列出地方政府项目地点及风险等级。后续应以项目清单和工程进度报告检视拨款落实情况。",
+    "category": "防灾与环境",
+    "source": "第47页；第245至248段"
+  },
+  {
+    "n": 27,
+    "title": "河流与蓄洪池维护",
+    "deck": "柔佛拨款RM4840万维护河流、沟渠及蓄洪池。",
+    "body": "预算案为Penyelenggaraan Sungai, Parit dan Kolam Takungan Banjir安排RM48.4 million，属于州内防洪风险管理措施。\n\n该项目与地方政府防洪管理、易淹水热点排水系统提升及防洪计划并列。文件没有在该段列出具体河段、沟渠或蓄洪池名单，不能据此判断某个社区已获得工程保障。",
+    "category": "防灾与环境",
+    "source": "第47页；第245至247段"
+  },
+  {
+    "n": 28,
+    "title": "道路维护",
+    "deck": "柔佛安排RM6.972亿维护近27000公里道路。",
+    "body": "预算案列出通过MARRIS拨款RM697.2 million，维护全州近27,000公里州道路、地方政府道路、乡村道路及农业道路。\n\n这是预算案中金额较大的基础设施项目之一。文件说明道路类别与大致里程，但没有在该段列出各地区分配金额或道路维修优先次序，实际工程范围仍需进一步公布。",
+    "category": "基础设施",
+    "source": "第42页；第220段"
+  },
+  {
+    "n": 29,
+    "title": "乡村道路升级",
+    "deck": "柔佛为乡村道路提升与扩宽安排RM5000万。",
+    "body": "预算案为Menai Taraf dan Melebar Jalan-Jalan Kampung安排RM50 million，目标是提升及扩宽乡村道路。\n\n该项目与MARRIS道路维护、主要道路建设及桥梁扩建措施并列。预算案没有列明具体村庄或道路清单，因此尚不能确认哪些路段会优先施工。",
+    "category": "基础设施",
+    "source": "第42页；第221段"
+  },
+  {
+    "n": 30,
+    "title": "公共巴士服务",
+    "deck": "Muafakat Johor巴士服务将继续运行，拨款RM3100万。",
+    "body": "柔佛州2027年预算案安排RM31 million，继续提供Perkhidmatan Bas Muafakat Johor（BMJ）。该措施属于公共交通基础设施与服务板块。\n\n预算案没有在该段公布路线、班次、乘客量或服务调整细节。服务延续是预算承诺，具体运营安排仍应以交通主管单位的公告为准。",
+    "category": "公共交通",
+    "source": "第43页；第226段"
+  },
+  {
+    "n": 31,
+    "title": "医院与景点免费接驳",
+    "deck": "柔佛将继续提供前往医院、动物园及SSI的免费巴士接驳服务。",
+    "body": "预算案为Shuttle Bas Johor安排RM1.7 million，继续提供前往Hospital Sultanah Aminah、Hospital Sultan Ismail、Zoo Johor及SSI的免费巴士服务。\n\n文件确认服务将继续，但没有在该段说明班次、站点、运营时段或车辆数量。乘客应以运营单位公布的最新路线与时间表为准。",
+    "category": "公共交通",
+    "source": "第43页；第227段"
+  },
+  {
+    "n": 32,
+    "title": "RTS接驳巴士",
+    "deck": "连接JB Sentral与Bukit Chagar RTS站的接驳巴士获RM150万。",
+    "body": "柔佛州预算案为连接JB Sentral与Stesen RTS Bukit Chagar的Feeder Bus服务安排RM1.5 million。\n\n这项安排被列入公共交通配套措施。预算案没有在该段公布路线长度、班次或与RTS启用时间的衔接安排，因此相关服务细节仍待进一步公布。",
+    "category": "公共交通",
+    "source": "第43页；第228段"
+  },
+  {
+    "n": 33,
+    "title": "水厂升级",
+    "deck": "Gunung Pulai、Sultan Ismail及Kahang滤水厂升级获RM2000万。",
+    "body": "预算案为提升Gunung Pulai、Sultan Ismail及Kahang滤水厂（LRA）设施安排RM20 million。该项目列在水资源与能源管理板块。\n\n文件没有在该段说明各水厂的工程分配、处理能力提升幅度或施工期限。拨款安排不能直接视为水厂升级工程已经完成。",
+    "category": "水务与能源",
+    "source": "第44页；第234段"
+  },
+  {
+    "n": 34,
+    "title": "水坝紧急行动计划",
+    "deck": "Upper Layang与Congok水坝将制定紧急行动计划，预算RM85万。",
+    "body": "预算案列出为Upper Layang水坝及Congok水坝制定Pelan Tindakan Kecemasan，拨款RM850,000。\n\n该项目属于水资源管理与风险应对措施。原文没有在该段说明研究范围、演练安排或计划完成日期，相关防灾准备工作仍须按后续执行情况追踪。",
+    "category": "水务与能源",
+    "source": "第44页；第237段"
+  },
+  {
+    "n": 35,
+    "title": "智慧监控与交通灯",
+    "deck": "柔佛为整合智能闭路电视及智能交通灯安排RM3610万。",
+    "body": "预算案提出扩大安装整合式Smart CCTV与Smart Traffic Light，拨款RM36.1 million，列在社区安全与福祉板块。\n\n该项目与Johor Selamat、公共景观及地方政府智慧城市数字系统并列。预算案没有在该段列出安装地点、摄像头数量或交通灯路口名单，实际覆盖范围需以后续项目资料确认。",
+    "category": "安全与科技",
+    "source": "第49页；第262至265段"
+  },
+  {
+    "n": 36,
+    "title": "智慧城市系统",
+    "deck": "地方政府智慧城市议程与数字系统发展获RM5200万。",
+    "body": "柔佛州2027年预算案为强化地方政府智慧城市议程及发展数字系统安排RM52 million。该项目列在安全、清洁与环境可持续支柱下。\n\n预算案没有在该段逐项说明系统构成、数据平台或参与的地方政府项目清单。拨款是政策规划的一部分，实际应用与服务改善仍须通过后续实施资料评估。",
+    "category": "安全与科技",
+    "source": "第50页；第265段"
+  },
+  {
+    "n": 37,
+    "title": "青年领导力",
+    "deck": "ONN Leadership Accelerator与Johor Apprentice获RM210万。",
+    "body": "预算案为强化ONN Leadership Accelerator（OLA）及Johor Apprentice（JA）安排RM2.1 million，列在柔佛青年领导力与志愿服务板块。\n\n该项目旨在支持青年领导力培养与相关学徒计划。文件没有在该段说明培训人数、学徒岗位数量或参与资格，实际招生与课程内容仍待执行单位公布。",
+    "category": "青年发展",
+    "source": "第51页；第267段"
+  },
+  {
+    "n": 38,
+    "title": "青年参与地方治理",
+    "deck": "柔佛拟扩大Dewan Muda，并在地方政府设立青年议会。",
+    "body": "预算案为继续推行Dewan Muda Johor，并通过在地方政府设立Dewan Muda PBT扩大参与，安排RM800,000。文件称，此举旨在加强青年参与州及地方政府规划与发展过程中的参与和领导力。\n\n这项承诺强调青年参与公共决策。预算案没有列明各地方政府成立时间、议席安排或遴选机制，相关制度设计仍有待公布。",
+    "category": "青年发展",
+    "source": "第51页；第268段"
+  },
+  {
+    "n": 39,
+    "title": "青年住房",
+    "deck": "柔佛拟提供1000个青年住宅单位，协助35岁以下青年及年轻家庭。",
+    "body": "预算案提出准备1,000个Rumah Orang Muda Johor单位，协助青年及35岁以下年轻伴侣取得可负担住房。\n\n这项计划列在柔佛青年支柱下。预算案该段没有提供房屋地点、售价、收入门槛或申请日期，因此应视为住房供应目标，而不是已开放申请或已交付的单位。",
+    "category": "青年发展",
+    "source": "第53页；第281段"
+  },
+  {
+    "n": 40,
+    "title": "青年节活动",
+    "deck": "2027年柔佛州青年日活动目标吸引15万名青年参与。",
+    "body": "预算案为Sambutan Hari Belia Negeri Johor 2027安排RM1 million，并以150,000名柔佛青年参与为目标。\n\n这项活动与Johor Next Gen Summit、Johor Youth Patriot及青年领导力项目并列。预算案列出的参与人数是目标规模，实际参与人数须待活动结束后核实。",
+    "category": "青年发展",
+    "source": "第52页；第270至273段"
+  },
+  {
+    "n": 41,
+    "title": "学生教育支援",
+    "deck": "柔佛为asnaf子女教育支援安排RM2780万。",
+    "body": "预算案列出Bantuan Sokongan Pendidikan Anak Asnaf，拨款RM27.8 million，预计惠及最多100,000名受益者。\n\n该措施属于教育支援项目。预算案没有在该段说明资助形式、学段分布或申请资格细则，因此不能将总拨款理解为每名学生平均可获得相同金额。",
+    "category": "教育与青年",
+    "source": "第54页；第293段"
+  },
+  {
+    "n": 42,
+    "title": "SPM考生午餐",
+    "deck": "柔佛为2027年SPM考生提供午餐计划，拨款RM300万。",
+    "body": "预算案列出Penyediaan Makan Tengah Hari Pelajar SPM 2027，拨款RM3 million，纳入学生支援与教育相关承诺。\n\n原文没有在该段说明计划覆盖的学校数量、供应日期或学生人数。报道仅确认预算案提出该项目及其拨款，不推定每一名SPM考生都已获得资格。",
+    "category": "教育与青年",
+    "source": "第55页；第296段"
+  },
+  {
+    "n": 43,
+    "title": "SPM文具支援",
+    "deck": "2027年SPM文具包计划获RM90万拨款。",
+    "body": "柔佛州2027年预算案为Kit Alat Tulis SPM 2027安排RM900,000，作为协助考生的教育支援项目。\n\n同一部分也列出SPM补习、午餐、学业奖励及学生领导力计划。预算案未在该段列明文具包数量、发放对象筛选方式或领取日期，相关执行信息仍待教育单位公布。",
+    "category": "教育与青年",
+    "source": "第55页；第297至300段"
+  },
+  {
+    "n": 44,
+    "title": "学校心理健康",
+    "deck": "柔佛拨款RM10万推行学校心理健康意识计划。",
+    "body": "预算案列出Program Kesedaran Kesihatan Mental Sekolah，拨款RM100,000，预计惠及5,000名学生。\n\n该项目属于青年与教育相关措施。文件没有在该段说明参与学校、活动形式或专业人员配置，因此不应推断该计划已经在所有学校开展。",
+    "category": "教育与青年",
+    "source": "第55页；第303段"
+  },
+  {
+    "n": 45,
+    "title": "体育赛事与设施",
+    "deck": "柔佛为SEA Games足球及五人制足球赛事安排RM4070万。",
+    "body": "预算案为2027年马来西亚东南亚运动会足球及五人制足球赛事举办安排RM40.7 million，并为Mount Austin Sports Hub提升与维修另列RM6.8 million。\n\n这两项是体育板块中的不同承诺，前者针对赛事举办，后者针对设施。预算案没有在该段提供赛事日程、工程细项或场馆交付日期。",
+    "category": "体育",
+    "source": "第57页；第311至312段"
+  },
+  {
+    "n": 46,
+    "title": "柔佛体育协会拨款",
+    "deck": "柔佛为各体育协会安排RM320万，另为聋人体育协会项目拨款RM10万。",
+    "body": "预算案列出向体育协会提供RM3.2 million拨款，并为Johor州聋人体育协会项目另安排RM100,000。\n\n两项安排均属于体育发展支柱。文件没有在该段列明各协会的分配比例、申请条件或项目名单，具体分配仍需以主管单位公布的资料为准。",
+    "category": "体育",
+    "source": "第58页；第327至328段"
+  },
+  {
+    "n": 47,
+    "title": "Kluang体育中心",
+    "deck": "Johor Sports Hub Kluang维修与升级获RM350万。",
+    "body": "柔佛州2027年预算案为Johor Sports Hub（Kluang）的提升及维修工程安排RM3.5 million。\n\n该项目列在体育基础设施发展板块，与Gambir Mini Stadium升级，以及社区礼堂、五人制足球场、Sepak Takraw场和足球场维修项目并列。文件没有在该段列出工程细项或完工日期。",
+    "category": "体育",
+    "source": "第59页；第329段"
+  },
+  {
+    "n": 48,
+    "title": "联邦发展拨款",
+    "deck": "联邦政府通过第13大马计划2027年第二滚动计划拨款柔佛RM48.6亿。",
+    "body": "预算案在结语部分感谢联邦政府通过第13大马计划（RMK13）2027年第二滚动计划，向柔佛提供RM4.86 billion拨款。\n\n这笔金额属于联邦层面的发展拨款安排，与柔佛州预算案自身的收入及支出预测不同。预算案没有在该段列出RM4.86 billion的完整项目分配清单，具体用途仍需参照联邦项目资料。",
+    "category": "联邦合作",
+    "source": "第60至61页；第334段"
+  },
+  {
+    "n": 49,
+    "title": "联邦公务员援助",
+    "deck": "在柔佛服务的联邦公务员每人将获RM500，拨款RM7280万。",
+    "body": "预算案提出，通过Bantuan Kasih Johor向在柔佛州服务的超过145,000名联邦公务员表达感谢，每人RM500，整体拨款RM72.8 million。\n\n该项安排面向在柔佛服务的联邦公务员。预算案没有在该段说明支付日期及资格核实程序，实际发放仍须以政府后续通知为准。",
+    "category": "公共服务",
+    "source": "第61页；第336段"
+  },
+  {
+    "n": 50,
+    "title": "州公务员特别奖励",
+    "deck": "柔佛州公务员特别奖励为2.5个月薪资，计划于12月发放。",
+    "body": "预算案宣布，柔佛州政府将向州政府雇员，以及由州政府支付薪资的联邦公共服务人员，发放相当于两个半月薪资的特别奖励，并计划在12月支付。\n\n该项措施列在预算案结语的公共服务致谢部分。文件没有在该段列出奖励总额或各职级计算细节，报道按原文所述对象与发放时间呈现。",
+    "category": "公共服务",
+    "source": "第62页；第337至340段"
+  }
+];
+
+function renderSouthernDaily(){
+  const category=$("sd-category"), search=$("sd-search"), target=$("sd-articles");
+  if(!category||!search||!target)return;
+  if(!category.dataset.ready){
+    [...new Set(SOUTHERN_ARTICLES.map(x=>x.category))].forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;category.appendChild(o)});
+    category.dataset.ready="1";
+    category.addEventListener("change",draw); search.addEventListener("input",draw);
+  }
+  function draw(){
+    const q=search.value.trim().toLowerCase(), c=category.value;
+    const list=SOUTHERN_ARTICLES.filter(x=>(c==="all"||x.category===c)&&(!q||(x.title+" "+x.deck+" "+x.body+" "+x.source+" "+x.category).toLowerCase().includes(q)));
+    $("sd-count").textContent=`显示 ${list.length} / 50 篇`;
+    target.innerHTML=list.map(x=>`<article class="sd-article"><div class="sd-kicker"><span class="pill">${x.n.toString().padStart(2,"0")}</span><span>${esc(x.category)}</span><span>南方日报 · 预算案专题</span></div><h3>${esc(x.title)}</h3><div class="sd-deck">${esc(x.deck)}</div><p>${esc(x.body)}</p><details><summary>查看原文依据</summary><p>${esc(x.source)}。文件：《TEKS UCAPAN PEMBENTANGAN BELANJAWAN JOHOR 2027》，日期：2026年11月19日。</p></details></article>`).join("")||'<div class="empty">没有找到符合条件的报道。</div>';
+  }
+  draw();
+}
+
 /* 页面导航 */
 function showPage(p){
   const target=$("page-"+p);
@@ -3351,6 +3828,7 @@ function showPage(p){
   if(p==="international")renderInternational();
   if(p==="compare")renderCompare();
   if(p==="sources")renderSources();
+  if(p==="malaya")renderSouthernDaily();
 
   window.scrollTo({top:0,behavior:"smooth"});
 }
